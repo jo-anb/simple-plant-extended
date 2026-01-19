@@ -78,7 +78,6 @@ class SimplePlantExtendedBinarySensor(BinarySensorEntity):
     async def async_added_to_hass(self) -> None:
         """Run when entity about to be added to hass."""
         await super().async_added_to_hass()
-        device = self.coordinator.device
 
         last_date = None
         daysbetween = None
@@ -112,7 +111,7 @@ class SimplePlantExtendedBinarySensor(BinarySensorEntity):
                     self._update_state,
                 )
             )
-            
+
         self.async_on_remove(
             async_track_time_change(
                 self.hass,
@@ -174,7 +173,7 @@ class SimplePlantExtendedProblem(SimplePlantExtendedBinarySensor):
 
         if not dates:
             return
-        
+
         next_date = None
         if self.entity_description.key == "problem":
             next_date = "next_watering"

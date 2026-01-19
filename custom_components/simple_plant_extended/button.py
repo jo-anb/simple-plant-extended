@@ -2,18 +2,18 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta
 from typing import TYPE_CHECKING
-import string
+
 from homeassistant.components.button import (
     ButtonEntity,
     ButtonEntityDescription,
 )
 
 from .const import DOMAIN
-from homeassistant.util.dt import as_local, as_utc, utcnow
 
 if TYPE_CHECKING:
+    from datetime import datetime
+
     from homeassistant.config_entries import ConfigEntry
     from homeassistant.core import HomeAssistant
     from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -91,14 +91,13 @@ class SimplePlantExtendedButton(ButtonEntity):
     def device(self) -> str | None:
         """Return the device name."""
         return self.coordinator.device
-        
+
     async def get_dates(self) -> dict[str, datetime] | None:
         """Get dates from relevants device entites states."""
         return await self.coordinator.get_dates()
 
     async def async_press(self) -> None:
         """Press the button."""
-        
         actions = [self.entity_description.key.split("_")[1]]
         if actions[0] == "fertilized":
             actions = ["fertilized", "watered"]
@@ -109,4 +108,3 @@ class SimplePlantExtendedButton(ButtonEntity):
 
         if self.entity_description.key == "update_data":
             await self.coordinator.async_migrate_data()
-            

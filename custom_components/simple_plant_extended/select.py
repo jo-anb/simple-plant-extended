@@ -9,9 +9,14 @@ from homeassistant.components.select import (
     SelectEntityDescription,
 )
 
-from homeassistant.helpers.event import async_track_state_change_event
-
-from .const import DOMAIN, HEALTH_OPTIONS, LOGGER, FEED_OPTIONS,ENABLED_OPTIONS, ILLUMINATION_OPTIONS
+from .const import (
+    DOMAIN,
+    ENABLED_OPTIONS,
+    FEED_OPTIONS,
+    HEALTH_OPTIONS,
+    ILLUMINATION_OPTIONS,
+    LOGGER,
+)
 
 if TYPE_CHECKING:
     from homeassistant.config_entries import ConfigEntry
@@ -117,8 +122,8 @@ class SimplePlantExtendedSelect(SelectEntity):
 
     async def async_added_to_hass(self) -> None:
         """Run when entity is added to hass."""
-        
-        async def _select_updated(event, new_value=None):
+
+        async def _select_updated(event: dict, new_value: str | None = None) -> None:
 
             if self.entity_description.key in ["cleaning_enabled", "misting_enabled"]:
                 subject = None
@@ -128,8 +133,8 @@ class SimplePlantExtendedSelect(SelectEntity):
                 elif self.entity_description.key == "cleaning_enabled":
                     subject = "cleaning"
                     subject_short = "clean"
-                
-                if new_value != None:
+
+                if new_value is not None:
                     new_state = new_value
                 else:
                     new_state_obj = event.data.get("new_state")
@@ -163,7 +168,7 @@ class SimplePlantExtendedSelect(SelectEntity):
                         },
                         blocking=True,
                     )
-                
+
         await super().async_added_to_hass()
 
         def warning(msg: str) -> None:

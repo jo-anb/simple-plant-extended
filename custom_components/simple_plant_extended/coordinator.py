@@ -1,12 +1,16 @@
 """Data coordinator for simple_plant_extended."""
 
 from __future__ import annotations
-import asyncio
 
+import asyncio
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Any
 
-from homeassistant.exceptions import ServiceValidationError
+from homeassistant.exceptions import (
+    HomeAssistantError,
+    ServiceNotFoundError,
+    ServiceValidationError,
+)
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.util import slugify
@@ -124,7 +128,6 @@ class SimplePlantExtendedCoordinator(DataUpdateCoordinator[dict]):
 
     async def get_dates(self) -> dict[str, datetime] | None:
         """Get dates from relevant device entity states, with retry."""
-
         states_to_get = {
             "last_watered": f"date.{DOMAIN}_last_watered_{self.device}",
             "nb_watered_days": f"number.{DOMAIN}_days_between_waterings_{self.device}",
@@ -184,200 +187,194 @@ class SimplePlantExtendedCoordinator(DataUpdateCoordinator[dict]):
                 "next_cleaning": last_cleaned_date + timedelta(days=nb_cleaned_days),
                 "today": utcnow(),
             }
-        except Exception as e:
+        except (ServiceNotFoundError, ServiceValidationError, HomeAssistantError) as e:
             LOGGER.warning("%s: Failed to parse dates: %s", self.device, e)
             return None
 
-    async def async_migrate_data(self) -> None:
-        """Migrate data for a device to another name."""
+    # async def async_migrate_data(self) -> None:
+    #     """Migrate data for a device to another name."""
+    #     states_to_get = {
+    #         "migrate_last_feed_date": f"sensor.{DOMAIN}_feed_lastfeed_{self.device}",
+    #         "feed_method": f"input_select.{DOMAIN}_feed_method_{self.device}",
+    #         "feed_interval": f"input_number.{DOMAIN}_feed_interval_{self.device}",
+    #         "misting_enabled": f"binary_sensor.{DOMAIN}_care_misting_enabled_{self.device}",
+    #         "misting_interval": f"input_number.{DOMAIN}_care_mist_interval_{self.device}",
+    #         "cleaning_enabled": f"binary_sensor.{DOMAIN}_care_cleaning_enabled_{self.device}",
+    #         "cleaning_interval": f"input_number.{DOMAIN}_care_clean_interval_{self.device}",
+    #         "next_misting": f"sensor.{DOMAIN}_care_next_misting_{self.device}",
+    #         "next_cleaning": f"sensor.{DOMAIN}_care_next_cleaning_{self.device}",
+    #     }
 
-        
-        states_to_get = {
-            "migrate_last_feed_date": f"sensor.{DOMAIN}_feed_lastfeed_{self.device}",
-            "feed_method": f"input_select.{DOMAIN}_feed_method_{self.device}",
-            "feed_interval": f"input_number.{DOMAIN}_feed_interval_{self.device}",
-            "misting_enabled": f"binary_sensor.{DOMAIN}_care_misting_enabled_{self.device}",
-            "misting_interval": f"input_number.{DOMAIN}_care_mist_interval_{self.device}",
-            "cleaning_enabled": f"binary_sensor.{DOMAIN}_care_cleaning_enabled_{self.device}",
-            "cleaning_interval": f"input_number.{DOMAIN}_care_clean_interval_{self.device}",
-            "next_misting": f"sensor.{DOMAIN}_care_next_misting_{self.device}",
-            "next_cleaning": f"sensor.{DOMAIN}_care_next_cleaning_{self.device}",
-        }
+    #     # Get states from hass
+    #     data = {key: self.hass.states.get(eid) for key, eid in states_to_get.items()}
 
-        # Get states from hass
-        data = {key: self.hass.states.get(eid) for key, eid in states_to_get.items()}
+    #     # Check if all states are available
+    #     if any(
+    #         data[key] is None
+    #         or not data[key].state  # type: ignore noqa: PGH003
+    #         or data[key].state == "unavailable"  # type: ignore noqa: PGH003
+    #         for key in states_to_get
+    #     ):
 
-        # Check if all states are available
-        if any(
-            data[key] is None
-            or not data[key].state  # type: ignore noqa: PGH003
-            or data[key].state == "unavailable"  # type: ignore noqa: PGH003
-            for key in states_to_get
-        ):
-            
-            return None
+    #         return
 
-        states = {key: data.state for key, data in data.items() if data is not None}
-        response = {
-            "status": "success",
-            "data": states,
-        }
+    #     states = {key: data.state for key, data in data.items() if data is not None}
+    #     response = {
+    #         "status": "success",
+    #         "data": states,
+    #     }
 
-        feed_actions = ["feed"]
-        for action in feed_actions:
-            last_action = states["migrate_last_feed_date"]
-            method = states["feed_method"]
-            interval = float(states["feed_interval"])
-            response["feed"] = { "message": f"{self.device} migrating feed data"}
-            
-            if last_action not in [None, "None", "unknown", "unavailable"]:
-                try:
-                    dt = datetime.fromisoformat(str(last_action))
-                    iso_date = dt.date().isoformat()
+    #     feed_actions = ["feed"]
+    #     for action in feed_actions:
+    #         last_action = states["migrate_last_feed_date"]
+    #         method = states["feed_method"]
+    #         interval = float(states["feed_interval"])
+    #         response["feed"] = { "message": f"{self.device} migrating feed data"}
 
-                    response["feed"]["last_action"] = await self.store.async_save_data(
-                        self.device,
-                        {"last_fertilized": iso_date},
-                    )
+    #         if last_action not in [None, "None", "unknown", "unavailable"]:
+    #             try:
+    #                 dt = datetime.fromisoformat(str(last_action))
+    #                 iso_date = dt.date().isoformat()
 
-                    iso_next_date = (dt + timedelta(days=round(interval))).date().isoformat()
+    #                 response["feed"]["last_action"] = await self.store.async_save_data(
+    #                     self.device,
+    #                     {"last_fertilized": iso_date},
+    #                 )
 
-                    response["feed"]["next_date"] = await self.store.async_save_data(
-                        self.device,
-                        {"next_fertilization": iso_next_date},
-                    )
+    #                 iso_next_date = (dt + timedelta(days=round(interval))).date().isoformat()
 
-                except Exception as e:
-                    response["status"] = "error"
-                    response["error"] = str(e)
-                    LOGGER.error("%s: Failed to convert feed date: %s", self.device, response)
-            else:
-                response["feed"]["last_action"] = {"message": "No last feed date to migrate"}
-                
-            if method not in [None, "None", "unknown", "unavailable"]:
-                try:
-                    feed_method_store = await self.store.async_save_data(
-                        self.device,
-                        {"feed_method": method},
-                    )
+    #                 response["feed"]["next_date"] = await self.store.async_save_data(
+    #                     self.device,
+    #                     {"next_fertilization": iso_next_date},
+    #                 )
 
-                    feed_method__sync = await self.hass.services.async_call(
-                        "select",
-                        "select_option",
-                        {
-                            "entity_id": f"select.{DOMAIN}_feed_method_{self.device}",
-                            "option": method,
-                        },
-                        blocking=True,
-                    )
-                    response["feed"]["method"] = f"{feed_method_store} \n {feed_method__sync}"
+    #             except (ServiceNotFoundError, ServiceValidationError, HomeAssistantError) as e:
+    #                 response["status"] = "error"
+    #                 response["error"] = str(e)
+    #                 LOGGER.error("%s: Failed to convert feed date: %s", self.device, response)
+    #         else:
+    #             response["feed"]["last_action"] = {"message": "No last feed date to migrate"}
 
-                except Exception as e:
-                    response["status"] = "error"
-                    response["error"] = str(e)
-                    LOGGER.error("%s: Failed to migrate feed method: %s", self.device, response)
-            else:
-                response["feed"]["method"] = {"message": "No feed method to migrate"}
+    #         if method not in [None, "None", "unknown", "unavailable"]:
+    #             try:
+    #                 feed_method_store = await self.store.async_save_data(
+    #                     self.device,
+    #                     {"feed_method": method},
+    #                 )
 
-        
-            if interval not in [None, "None", "unknown", "unavailable"]:
-                try:
-                    interval_store = await self.store.async_save_data(
-                        self.device,
-                        {"days_between_fertilizations": interval},
-                    )
-                    interval_sync = await self.hass.services.async_call(
-                        "number",
-                        "set_value",
-                        {
-                            "entity_id": f"number.{DOMAIN}_days_between_fertilizations_{self.device}",
-                            "value": interval,
-                        },
-                        blocking=True,
-                    )
-                    response["feed"]["interval"] = f"{interval_store} \n {interval_sync}"
-                    # await self.async_set_last_action_date(iso_date, "last_fertilized")
+    #                 feed_method__sync = await self.hass.services.async_call(
+    #                     "select",
+    #                     "select_option",
+    #                     {
+    #                         "entity_id": f"select.{DOMAIN}_feed_method_{self.device}",
+    #                         "option": method,
+    #                     },
+    #                     blocking=True,
+    #                 )
+    #                 response["feed"]["method"] = f"{feed_method_store} \n {feed_method__sync}"
 
-                except Exception as e:
-                    response["status"] = "error"
-                    response["error"] = str(e)
-                    LOGGER.error("%s: Failed to migrate feed interval: %s", self.device, response)
-            else:
-                response["feed"]["interval"] = {"message": "No feed interval to migrate"}
+    #             except (ServiceNotFoundError, ServiceValidationError, HomeAssistantError) as e:
+    #                 response["status"] = "error"
+    #                 response["error"] = str(e)
+    #                 LOGGER.error("%s: Failed to migrate feed method: %s", self.device, response)
+    #         else:
+    #             response["feed"]["method"] = {"message": "No feed method to migrate"}
 
-        care_actions = ["misting", "cleaning"]
-        for action in care_actions:
-            enabled = states[f"{action}_enabled"]
-            interval = float(states[f"{action}_interval"])
-            next_action = states[f"next_{action}"]
-            response[f"{action}"] = {"message": f"{self.device} migrating care data"}
 
-            if enabled not in [None, "None", "unknown", "unavailable"]:
-                try:
-                    enabled_store = await self.store.async_save_data(
-                        self.device,
-                        {f"{action}_enabled": enabled},
-                    )
+    #         if interval not in [None, "None", "unknown", "unavailable"]:
+    #             try:
+    #                 interval_store = await self.store.async_save_data(
+    #                     self.device,
+    #                     {"days_between_fertilizations": interval},
+    #                 )
+    #                 interval_sync = await self.hass.services.async_call(
+    #                     "number",
+    #                     "set_value",
+    #                     {
+    #                         "entity_id": f"number.{DOMAIN}_days_between_fertilizations_{self.device}",
+    #                         "value": interval,
+    #                     },
+    #                     blocking=True,
+    #                 )
+    #                 response["feed"]["interval"] = f"{interval_store} \n {interval_sync}"
+    #                 # await self.async_set_last_action_date(iso_date, "last_fertilized")
 
-                    enabled_sync = await self.hass.services.async_call(
-                        "select",
-                        "select_option",
-                        {
-                            "entity_id": f"select.{DOMAIN}_{action}_enabled_{self.device}",
-                            "option": enabled,
-                        },
-                        blocking=True,
-                    )
-                    response[f"{action}"]["enabled"] = f"{enabled_store} \n {enabled_sync}"
-                except Exception as e:
-                    response["status"] = "error"
-                    response["error"] = str(e)
-                    LOGGER.error("%s: Failed to migrate %s enabled: %s", self.device, action, response)
-            else:
-                response[f"{action}"]["enabled"] = {"message": "No enabled state to migrate"}
-            
-            if interval not in [None, "None", "unknown", "unavailable"]:
-                try:
-                    interval_store = await self.store.async_save_data(
-                        self.device,
-                        {f"days_between_{action}s": interval},
-                    )
-                    interval_sync = await self.hass.services.async_call(
-                        "number",
-                        "set_value",
-                        {
-                            "entity_id": f"number.{DOMAIN}_days_between_{action}s_{self.device}",
-                            "value": interval,
-                        },
-                        blocking=True,
-                    )
-                    response[f"{action}"]["interval"] = f"{interval_store} \n {interval_sync}"
-                except Exception as e:
-                    response["status"] = "error"
-                    response["error"] = str(e)
-                    LOGGER.error("%s: Failed to migrate %s interval: %s", self.device, action, response)
-            else:
-                response[f"{action}"]["interval"] = {"message": "No interval state to migrate"}
+    #             except (ServiceNotFoundError, ServiceValidationError, HomeAssistantError) as e:
+    #                 response["status"] = "error"
+    #                 response["error"] = str(e)
+    #                 LOGGER.error("%s: Failed to migrate feed interval: %s", self.device, response)
+    #         else:
+    #             response["feed"]["interval"] = {"message": "No feed interval to migrate"}
 
-            if next_action not in [None, "None", "unknown", "unavailable"]:
-                try:
-                    dt = datetime.fromisoformat(str(next_action))
-                    iso_date = (dt - timedelta(days=round(interval))).date().isoformat()
-                    action_type = None
-                    if "clean" in action:
-                        action_type = "cleaned"
-                    else:
-                        action_type = "misted"
+    #     care_actions = ["misting", "cleaning"]
+    #     for action in care_actions:
+    #         enabled = states[f"{action}_enabled"]
+    #         interval = float(states[f"{action}_interval"])
+    #         next_action = states[f"next_{action}"]
+    #         response[f"{action}"] = {"message": f"{self.device} migrating care data"}
 
-                    response[f"{action}"]["next_date"] = await self.store.async_save_data(
-                        self.device,
-                        {f"last_{action_type}": iso_date},
-                    )
-                except Exception as e:
-                    response["status"] = "error"
-                    response["error"] = str(e)
-                    LOGGER.error("%s: Failed to migrate last %s date: %s", self.device, action, response)
-            else:
-                response[f"{action}"]["next_date"] = {"message": "No last date state to migrate"}
-        await self.async_refresh()
-        LOGGER.warning("%s: Finished Migrating data:\n\n %s", self.device, response)
+    #         if enabled not in [None, "None", "unknown", "unavailable"]:
+    #             try:
+    #                 enabled_store = await self.store.async_save_data(
+    #                     self.device,
+    #                     {f"{action}_enabled": enabled},
+    #                 )
+
+    #                 enabled_sync = await self.hass.services.async_call(
+    #                     "select",
+    #                     "select_option",
+    #                     {
+    #                         "entity_id": f"select.{DOMAIN}_{action}_enabled_{self.device}",
+    #                         "option": enabled,
+    #                     },
+    #                     blocking=True,
+    #                 )
+    #                 response[f"{action}"]["enabled"] = f"{enabled_store} \n {enabled_sync}"
+    #             except (ServiceNotFoundError, ServiceValidationError, HomeAssistantError) as e:
+    #                 response["status"] = "error"
+    #                 response["error"] = str(e)
+    #                 LOGGER.error("%s: Failed to migrate %s enabled: %s", self.device, action, response)
+    #         else:
+    #             response[f"{action}"]["enabled"] = {"message": "No enabled state to migrate"}
+
+    #         if interval not in [None, "None", "unknown", "unavailable"]:
+    #             try:
+    #                 interval_store = await self.store.async_save_data(
+    #                     self.device,
+    #                     {f"days_between_{action}s": interval},
+    #                 )
+    #                 interval_sync = await self.hass.services.async_call(
+    #                     "number",
+    #                     "set_value",
+    #                     {
+    #                         "entity_id": f"number.{DOMAIN}_days_between_{action}s_{self.device}",
+    #                         "value": interval,
+    #                     },
+    #                     blocking=True,
+    #                 )
+    #                 response[f"{action}"]["interval"] = f"{interval_store} \n {interval_sync}"
+    #             except (ServiceNotFoundError, ServiceValidationError, HomeAssistantError) as e:
+    #                 response["status"] = "error"
+    #                 response["error"] = str(e)
+    #                 LOGGER.error("%s: Failed to migrate %s interval: %s", self.device, action, response)
+    #         else:
+    #             response[f"{action}"]["interval"] = {"message": "No interval state to migrate"}
+
+    #         if next_action not in [None, "None", "unknown", "unavailable"]:
+    #             try:
+    #                 dt = datetime.fromisoformat(str(next_action))
+    #                 iso_date = (dt - timedelta(days=round(interval))).date().isoformat()
+    #                 action_type = "cleaned" if action == "cleaning" else "misted"
+
+    #                 response[f"{action}"]["next_date"] = await self.store.async_save_data(
+    #                     self.device,
+    #                     {f"last_{action_type}": iso_date},
+    #                 )
+    #             except (ServiceNotFoundError, ServiceValidationError, HomeAssistantError) as e:
+    #                 response["status"] = "error"
+    #                 response["error"] = str(e)
+    #                 LOGGER.error("%s: Failed to migrate last %s date: %s", self.device, action, response)
+    #         else:
+    #             response[f"{action}"]["next_date"] = {"message": "No last date state to migrate"}
+    #     await self.async_refresh()
+    #     LOGGER.warning("%s: Finished Migrating data:\n\n %s", self.device, response)
