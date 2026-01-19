@@ -4,7 +4,7 @@
 [![Release](https://img.shields.io/github/v/release/jo-anb/simple-plant-extended?style=for-the-badge)](https://github.com/jo-anb/simple-plant-extended/releases/latest)
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
 [![Validation](https://github.com/jo-anb/simple-plant-extended/actions/workflows/validate.yml/badge.svg?style=for-the-badge)](https://github.com/jo-anb/simple-plant-extended/actions/workflows/validate.yml)
-[![buymeacoffee](https://img.shields.io/badge/buy%20me%20a%20coffee-%23FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/jo-anb)
+[![buymeacoffee](https://img.shields.io/badge/buy%20me%20a%20coffee-%23FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/joannaomie)
 
 
 This is an extention on the [simple-plant](https://github.com/ndesgranges/simple-plant-card) integration from @ndesgranges.
