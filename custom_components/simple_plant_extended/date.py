@@ -57,7 +57,9 @@ async def async_setup_entry(
     )
 
 
-class SimplePlantExtendedDate(CoordinatorEntity[SimplePlantExtendedCoordinator], DateEntity):
+class SimplePlantExtendedDate(
+    CoordinatorEntity[SimplePlantExtendedCoordinator], DateEntity
+):
     """simple_plant_extended date class."""
 
     _attr_has_entity_name = True
@@ -101,7 +103,9 @@ class SimplePlantExtendedDate(CoordinatorEntity[SimplePlantExtendedCoordinator],
         # Validate the date is not in the future
         dt = datetime.combine(value, datetime.min.time())
         new_val = as_utc(as_local(dt))
-        await self.coordinator.async_set_last_action_date(new_val, self.entity_description.key)
+        await self.coordinator.async_set_last_action_date(
+            new_val, self.entity_description.key
+        )
 
     @property
     def native_value(self) -> date | None:

@@ -19,7 +19,6 @@ from homeassistant.util.dt import as_local
 from .const import DOMAIN
 
 if TYPE_CHECKING:
-
     from homeassistant.config_entries import ConfigEntry
     from homeassistant.core import Event, EventStateChangedData, HomeAssistant
     from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -93,7 +92,9 @@ class SimplePlantExtendedSensor(SensorEntity):
         self.entity_description = description
         self._fallback_value: date | None = None
         self._attr_native_value: date | None = None
-        self.coordinator: SimplePlantExtendedCoordinator = hass.data[DOMAIN][entry.entry_id]
+        self.coordinator: SimplePlantExtendedCoordinator = hass.data[DOMAIN][
+            entry.entry_id
+        ]
 
         device = self.coordinator.device
 
@@ -138,7 +139,6 @@ class SimplePlantExtendedSensor(SensorEntity):
         if "cleaning" in self.entity_description.key:
             last_date = f"date.{DOMAIN}_last_cleaned_{self.device}"
             daysbetween = f"number.{DOMAIN}_days_between_cleanings_{self.device}"
-
 
         self.async_on_remove(
             async_track_state_change_event(

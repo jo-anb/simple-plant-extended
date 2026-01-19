@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Wrapper script to run semantic-release with .env file support."""
+
 from dotenv import load_dotenv
 import subprocess
 import sys

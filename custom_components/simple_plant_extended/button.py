@@ -77,7 +77,9 @@ class SimplePlantExtendedButton(ButtonEntity):
         super().__init__()
 
         self.entity_description = description
-        self.coordinator: SimplePlantExtendedCoordinator = hass.data[DOMAIN][entry.entry_id]
+        self.coordinator: SimplePlantExtendedCoordinator = hass.data[DOMAIN][
+            entry.entry_id
+        ]
 
         device = self.coordinator.device
 

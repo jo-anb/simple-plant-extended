@@ -57,7 +57,9 @@ class SimplePlantExtendedImage(ImageEntity):
         super().__init__(hass)
         self.entity_description = description
 
-        self.coordinator: SimplePlantExtendedCoordinator = hass.data[DOMAIN][entry.entry_id]
+        self.coordinator: SimplePlantExtendedCoordinator = hass.data[DOMAIN][
+            entry.entry_id
+        ]
 
         device = self.coordinator.device
 

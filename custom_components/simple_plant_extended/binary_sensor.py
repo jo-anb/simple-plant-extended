@@ -43,7 +43,9 @@ class SimplePlantExtendedBinarySensor(BinarySensorEntity):
         super().__init__()
         self._hass = hass
         self.entity_description = description
-        self.coordinator: SimplePlantExtendedCoordinator = hass.data[DOMAIN][entry.entry_id]
+        self.coordinator: SimplePlantExtendedCoordinator = hass.data[DOMAIN][
+            entry.entry_id
+        ]
 
         self._attr_should_poll = True
 

@@ -101,7 +101,9 @@ class SimplePlantExtendedSelect(SelectEntity):
         super().__init__()
         self.entity_description = description
         self._fallback_value = str(entry.data.get(description.key, "notset"))
-        self.coordinator: SimplePlantExtendedCoordinator = hass.data[DOMAIN][entry.entry_id]
+        self.coordinator: SimplePlantExtendedCoordinator = hass.data[DOMAIN][
+            entry.entry_id
+        ]
 
         device = self.coordinator.device
 
@@ -124,7 +126,6 @@ class SimplePlantExtendedSelect(SelectEntity):
         """Run when entity is added to hass."""
 
         async def _select_updated(event: dict, new_value: str | None = None) -> None:
-
             if self.entity_description.key in ["cleaning_enabled", "misting_enabled"]:
                 subject = None
                 if self.entity_description.key == "misting_enabled":
@@ -142,28 +143,32 @@ class SimplePlantExtendedSelect(SelectEntity):
 
                 if new_state == "on":
                     await self.hass.services.async_call(
-                        "homeassistant", "turn_on",
-                        {"entity_id": [
-                            f"button.{DOMAIN}_mark_{subject_short}ed_{self.device}",
-                            f"date.{DOMAIN}_last_{subject_short}ed_{self.device}",
-                            f"number.{DOMAIN}_days_between_{subject}s_{self.device}",
-                            f"binary_sensor.{DOMAIN}_{subject}_problem_{self.device}",
-                            f"binary_sensor.{DOMAIN}_{subject}_todo_{self.device}",
-                            f"sensor.{DOMAIN}_next_{subject}_{self.device}",
+                        "homeassistant",
+                        "turn_on",
+                        {
+                            "entity_id": [
+                                f"button.{DOMAIN}_mark_{subject_short}ed_{self.device}",
+                                f"date.{DOMAIN}_last_{subject_short}ed_{self.device}",
+                                f"number.{DOMAIN}_days_between_{subject}s_{self.device}",
+                                f"binary_sensor.{DOMAIN}_{subject}_problem_{self.device}",
+                                f"binary_sensor.{DOMAIN}_{subject}_todo_{self.device}",
+                                f"sensor.{DOMAIN}_next_{subject}_{self.device}",
                             ]
                         },
                         blocking=True,
                     )
                 elif new_state == "off":
                     await self.hass.services.async_call(
-                        "homeassistant", "turn_off",
-                        {"entity_id": [
-                            f"button.{DOMAIN}_mark_{subject_short}ed_{self.device}",
-                            f"date.{DOMAIN}_last_{subject_short}ed_{self.device}",
-                            f"number.{DOMAIN}_days_between_{subject}s_{self.device}",
-                            f"binary_sensor.{DOMAIN}_{subject}_problem_{self.device}",
-                            f"binary_sensor.{DOMAIN}_{subject}_todo_{self.device}",
-                            f"sensor.{DOMAIN}_next_{subject}_{self.device}",
+                        "homeassistant",
+                        "turn_off",
+                        {
+                            "entity_id": [
+                                f"button.{DOMAIN}_mark_{subject_short}ed_{self.device}",
+                                f"date.{DOMAIN}_last_{subject_short}ed_{self.device}",
+                                f"number.{DOMAIN}_days_between_{subject}s_{self.device}",
+                                f"binary_sensor.{DOMAIN}_{subject}_problem_{self.device}",
+                                f"binary_sensor.{DOMAIN}_{subject}_todo_{self.device}",
+                                f"sensor.{DOMAIN}_next_{subject}_{self.device}",
                             ]
                         },
                         blocking=True,
@@ -188,7 +193,6 @@ class SimplePlantExtendedSelect(SelectEntity):
         await self.async_select_option(data)
 
         # await _select_updated({"data": {"new_state": data}}, new_value=data)
-
 
         # Volg de select-waarde
         # self.async_on_remove(

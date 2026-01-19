@@ -47,8 +47,6 @@ class SimplePlantExtendedCoordinator(DataUpdateCoordinator[dict]):
             model=entry.data.get("species"),
         )
 
-
-
     async def _async_update_data(self) -> dict[str, Any]:
         """Fetch data from storage."""
         await self.store.async_load()
@@ -104,14 +102,18 @@ class SimplePlantExtendedCoordinator(DataUpdateCoordinator[dict]):
         if last_action and as_local(last_action).date() != as_local(utcnow()).date():
             await self.async_action_mark_action(save_old=last_action, action=action)
         else:
-            await self.async_action_cancel_mark_action(old_value=old_last_action, action=action)
+            await self.async_action_cancel_mark_action(
+                old_value=old_last_action, action=action
+            )
 
     async def async_action_cancel_mark_action(
         self, old_value: datetime | None = None, action: str = "watered"
     ) -> None:
         """Update last action date to old value."""
         if old_value:
-            await self.async_set_last_action_date(as_utc(old_value), action=f"last_{action}")
+            await self.async_set_last_action_date(
+                as_utc(old_value), action=f"last_{action}"
+            )
         else:
             await self.async_action_mark_action(action=action)
 
@@ -141,15 +143,20 @@ class SimplePlantExtendedCoordinator(DataUpdateCoordinator[dict]):
         }
 
         for attempt in range(5):
-            data = {key: self.hass.states.get(eid) for key, eid in states_to_get.items()}
+            data = {
+                key: self.hass.states.get(eid) for key, eid in states_to_get.items()
+            }
 
             if all(
-                data[key] is not None and data[key].state not in (None, "", "unknown", "unavailable")
+                data[key] is not None
+                and data[key].state not in (None, "", "unknown", "unavailable")
                 for key in states_to_get
             ):
                 break
 
-            LOGGER.info("%s: Waiting for entity states... (%d)", self.device, attempt + 1)
+            LOGGER.info(
+                "%s: Waiting for entity states... (%d)", self.device, attempt + 1
+            )
             await asyncio.sleep(2)
         else:
             LOGGER.warning("%s: Couldn't get all states after retry", self.device)
@@ -164,23 +171,36 @@ class SimplePlantExtendedCoordinator(DataUpdateCoordinator[dict]):
             last_fertilized_date = datetime.fromisoformat("1970-01-01")
             if states["last_fertilized"] not in ["unknown", "", "None"]:
                 last_fertilized_date = datetime.fromisoformat(states["last_fertilized"])
-            nb_fertilized_days = float(states["nb_fertilized_days"]) if float(states["nb_fertilized_days"]) > 0 else 1
+            nb_fertilized_days = (
+                float(states["nb_fertilized_days"])
+                if float(states["nb_fertilized_days"]) > 0
+                else 1
+            )
 
             last_misted_date = datetime.fromisoformat("1970-01-01")
             if states["last_misted"] not in ["unknown", "", "None"]:
                 last_misted_date = datetime.fromisoformat(states["last_misted"])
-            nb_misted_days = float(states["nb_misted_days"]) if float(states["nb_misted_days"]) > 0 else 1
+            nb_misted_days = (
+                float(states["nb_misted_days"])
+                if float(states["nb_misted_days"]) > 0
+                else 1
+            )
 
             last_cleaned_date = datetime.fromisoformat("1970-01-01")
             if states["last_cleaned"] not in ["unknown", "", "None"]:
                 last_cleaned_date = datetime.fromisoformat(states["last_cleaned"])
-            nb_cleaned_days = float(states["nb_cleaned_days"]) if float(states["nb_cleaned_days"]) > 0 else 1
+            nb_cleaned_days = (
+                float(states["nb_cleaned_days"])
+                if float(states["nb_cleaned_days"]) > 0
+                else 1
+            )
 
             return {
                 "last_watered": last_watered_date,
                 "next_watering": last_watered_date + timedelta(days=nb_watered_days),
                 "last_fertilized": last_fertilized_date,
-                "next_fertilization": last_fertilized_date + timedelta(days=nb_fertilized_days),
+                "next_fertilization": last_fertilized_date
+                + timedelta(days=nb_fertilized_days),
                 "last_misted": last_misted_date,
                 "next_misting": last_misted_date + timedelta(days=nb_misted_days),
                 "last_cleaned": last_cleaned_date,
@@ -279,7 +299,6 @@ class SimplePlantExtendedCoordinator(DataUpdateCoordinator[dict]):
     #                 LOGGER.error("%s: Failed to migrate feed method: %s", self.device, response)
     #         else:
     #             response["feed"]["method"] = {"message": "No feed method to migrate"}
-
 
     #         if interval not in [None, "None", "unknown", "unavailable"]:
     #             try:
