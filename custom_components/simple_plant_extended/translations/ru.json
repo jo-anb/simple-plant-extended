@@ -27,10 +27,18 @@
     "options": {
         "step": {
             "init": {
-                "description": "Измените вид или изображение вашего растения. Если вам нужна помощь с настройкой, посмотрите здесь: https://github.com/jo-anb/simple-plant-extended",
+                    "description": "Измените данные растения или настройки уведомлений. Если вам нужна помощь с настройкой, посмотрите здесь: https://github.com/jo-anb/simple-plant-extended",
                 "data": {
                     "photo": "Фото",
-                    "species": "Вид/Сорт растения (Необязательно)"
+                        "species": "Вид/Сорт растения (Необязательно)",
+                        "notify_services": "Сервисы уведомлений",
+                        "notifications_enabled": "Включить уведомления",
+                        "dnd_start": "Начало режима «Не беспокоить»",
+                    "dnd_end": "Конец режима «Не беспокоить»",
+                    "broadcast_enabled": "Включить трансляцию",
+                    "broadcast_services": "Сервисы трансляции",
+                    "broadcast_time_1": "Время трансляции 1",
+                    "broadcast_time_2": "Время трансляции 2"
                 }
             }
         },
@@ -83,6 +91,34 @@
         "sensor": {
             "next_watering": {
                 "name": "Следующий полив"
+            }
+        }
+    },
+    "component": {
+        "simple_plant_extended": {
+            "notification": {
+                "water_today_title": "🌱🫗 {plant} нужно полить сегодня",
+                "water_late_title": "🌱🫗 Полив {plant} просрочен на {days} дней",
+                "water_message": "Нажмите ниже, когда вы полили {plant}.",
+                "fertilize_today_title": "🌱🫗 {plant} нужно подкормить сегодня",
+                "fertilize_message": "Нажмите ниже, когда вы подкормил(и) {plant}.",
+                "mist_today_title": "🌱🫗 {plant} нужно опрыскать сегодня",
+                "mist_message": "Нажмите ниже, когда вы опрыскали {plant}.",
+                "clean_today_title": "🌱🫗 {plant} нужно очистить сегодня",
+                "clean_message": "Нажмите ниже, когда вы очистили {plant}.",
+                "action_mark_done": "✅ Отметить как сделано",
+                "action_skip": "Пропустить"
+            },
+            "broadcast": {
+                "water_overdue": "Просроченная задача для {plant}. {plant} нужно было полить {when} назад.",
+                "water_today": "{plant} нужно полить сегодня.",
+                "fertilize_overdue": "Просроченная задача для {plant}. {plant} нужно было подкормить ({feed_type}) {when} назад.",
+                "fertilize_today": "{plant} нужно подкормить ({feed_type}) сегодня.",
+                "mist_overdue": "Просроченная задача для {plant}. {plant} нужно было опрыскать {when} назад.",
+                "mist_today": "{plant} нужно опрыскать сегодня.",
+                "clean_overdue": "Просроченная задача для {plant}. {plant} нужно было очистить {when} назад.",
+                "clean_today": "{plant} нужно очистить сегодня.",
+                "no_tasks": "Сейчас нет задач по растениям."
             }
         }
     },

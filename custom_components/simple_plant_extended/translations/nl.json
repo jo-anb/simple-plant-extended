@@ -38,10 +38,18 @@
   "options": {
     "step": {
       "init": {
-        "description": "Wijzig de soort of foto van je plant. Hulp nodig bij de configuratie? Zie: https://github.com/jo-anb/simple-plant-extended",
+        "description": "Wijzig plantdetails of meldingsinstellingen. Hulp nodig bij de configuratie? Zie: https://github.com/jo-anb/simple-plant-extended",
         "data": {
           "photo": "Foto",
-          "species": "Soort/variëteit van je plant (optioneel)"
+          "species": "Soort/variëteit van je plant (optioneel)",
+          "notify_services": "Meldingsdiensten",
+          "notifications_enabled": "Meldingen inschakelen",
+          "dnd_start": "Niet storen starttijd",
+          "dnd_end": "Niet storen eindtijd",
+          "broadcast_enabled": "Broadcast inschakelen",
+          "broadcast_services": "Broadcastdiensten",
+          "broadcast_time_1": "Broadcast tijd 1",
+          "broadcast_time_2": "Broadcast tijd 2"
         }
       }
     },
@@ -184,6 +192,34 @@
       },
       "next_cleaning": {
         "name": "Volgende schoonmaak"
+      }
+    }
+  },
+  "component": {
+    "simple_plant_extended": {
+      "notification": {
+        "water_today_title": "🌱🫗 {plant} moet vandaag water krijgen",
+        "water_late_title": "🌱🫗 {plant} water geven is {days} dagen over tijd",
+        "water_message": "Tik hieronder als je {plant} water gaf.",
+        "fertilize_today_title": "🌱🫗 {plant} moet vandaag gevoed worden",
+        "fertilize_message": "Tik hieronder als je {plant} gevoed hebt.",
+        "mist_today_title": "🌱🫗 {plant} moet vandaag beneveld worden",
+        "mist_message": "Tik hieronder als je {plant} benevelde.",
+        "clean_today_title": "🌱🫗 {plant} moet vandaag gereinigd worden",
+        "clean_message": "Tik hieronder als je {plant} gereinigd hebt.",
+        "action_mark_done": "✅ Markeer als gedaan",
+        "action_skip": "Overslaan"
+      },
+      "broadcast": {
+        "water_overdue": "Overdue taak voor {plant}. {plant} moest {when} geleden water krijgen.",
+        "water_today": "{plant} moet vandaag water krijgen.",
+        "fertilize_overdue": "Overdue taak voor {plant}. {plant} had {feed_type} plantenvoeding nodig {when} geleden.",
+        "fertilize_today": "{plant} heeft vandaag {feed_type} plantenvoeding nodig.",
+        "mist_overdue": "Overdue taak voor {plant}. {plant} moest {when} geleden beneveld worden.",
+        "mist_today": "{plant} moet vandaag beneveld worden.",
+        "clean_overdue": "Overdue taak voor {plant}. {plant} moest {when} geleden gereinigd worden.",
+        "clean_today": "{plant} moet vandaag gereinigd worden.",
+        "no_tasks": "Geen planttaken op dit moment."
       }
     }
   },

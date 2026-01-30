@@ -38,10 +38,18 @@
     "options": {
         "step": {
             "init": {
-                "description": "Modify the species or picture of your plant. If you need help with the configuration have a look here: https://github.com/jo-anb/simple-plant-extended",
+                    "description": "Modify plant details or notification settings. If you need help with the configuration have a look here: https://github.com/jo-anb/simple-plant-extended",
                 "data": {
                     "photo": "Photo",
-                    "species": "Species/Variety of your plant (Optional)"
+                        "species": "Species/Variety of your plant (Optional)",
+                        "notify_services": "Notification services",
+                        "notifications_enabled": "Enable notifications",
+                        "dnd_start": "Do not disturb start",
+                    "dnd_end": "Do not disturb end",
+                    "broadcast_enabled": "Enable broadcast",
+                    "broadcast_services": "Broadcast services",
+                    "broadcast_time_1": "Broadcast time 1",
+                    "broadcast_time_2": "Broadcast time 2"
                 }
             }
         },
@@ -184,6 +192,34 @@
             },
             "next_cleaning": {
                 "name": "Next cleaning"
+            }
+        }
+    },
+    "component": {
+        "simple_plant_extended": {
+            "notification": {
+                "water_today_title": "🌱🫗 {plant} needs watering today",
+                "water_late_title": "🌱🫗 {plant} watering is {days} days overdue",
+                "water_message": "Tap below when you've watered {plant}.",
+                "fertilize_today_title": "🌱🫗 {plant} needs fertilizing today",
+                "fertilize_message": "Tap below when you've fertilized {plant}.",
+                "mist_today_title": "🌱🫗 {plant} needs misting today",
+                "mist_message": "Tap below when you've misted {plant}.",
+                "clean_today_title": "🌱🫗 {plant} needs cleaning today",
+                "clean_message": "Tap below when you've cleaned {plant}.",
+                "action_mark_done": "✅ Mark as done",
+                "action_skip": "Skip"
+            },
+            "broadcast": {
+                "water_overdue": "Overdue task for {plant}. {plant} needed to be watered {when} ago.",
+                "water_today": "{plant} needs to be watered today.",
+                "fertilize_overdue": "Overdue task for {plant}. {plant} needed {feed_type} plantfood {when} ago.",
+                "fertilize_today": "{plant} needs {feed_type} plantfood today.",
+                "mist_overdue": "Overdue task for {plant}. {plant} needed misting {when} ago.",
+                "mist_today": "{plant} needs misting today.",
+                "clean_overdue": "Overdue task for {plant}. {plant} needed cleaning {when} ago.",
+                "clean_today": "{plant} needs cleaning today.",
+                "no_tasks": "No plant tasks right now."
             }
         }
     },

@@ -23,6 +23,7 @@ from homeassistant.util import slugify
 from .config_flow import remove_photo
 from .const import DOMAIN, LOGGER, PLATFORMS
 from .coordinator import SimplePlantExtendedCoordinator
+from .notification_manager import NotificationManager
 
 if TYPE_CHECKING:
     from homeassistant.config_entries import ConfigEntry
@@ -36,6 +37,12 @@ CONFIG_SCHEMA = config_entry_only_config_schema(DOMAIN)
 async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
     """Set up the Simple Plant component."""
     hass.data.setdefault(DOMAIN, {})
+
+    # Start runtime notifications/broadcast manager
+    manager = NotificationManager(hass)
+    hass.data[DOMAIN]["notification_manager"] = manager
+    await manager.async_start()
+
     return True
 
 
@@ -61,6 +68,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             on_device_registry_update_handler,
         )
     )
+
+    manager: NotificationManager | None = hass.data[DOMAIN].get("notification_manager")
+    if manager is not None:
+        await manager.async_refresh()
 
     return True
 
@@ -126,6 +137,12 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id)
 
+        manager: NotificationManager | None = hass.data[DOMAIN].get(
+            "notification_manager"
+        )
+        if manager is not None:
+            await manager.async_refresh()
+
     return unload_ok
 
 
@@ -163,3 +180,7 @@ async def async_reload_entry(
     LOGGER.info("Reloading entry %s", entry.title)
     await async_unload_entry(hass, entry)
     await async_setup_entry(hass, entry)
+
+    manager: NotificationManager | None = hass.data[DOMAIN].get("notification_manager")
+    if manager is not None:
+        await manager.async_refresh()

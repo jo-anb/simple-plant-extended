@@ -27,10 +27,18 @@
     "options": {
         "step": {
             "init": {
-                "description": "Modifiez L'image ou l'espèce de votre plante. Si vous avez besoin d'aide, allez jeter un oeil ici : https://github.com/jo-anb/simple-plant-extended",
+                    "description": "Modifiez les détails de la plante ou les paramètres de notification. Si vous avez besoin d'aide, allez jeter un oeil ici : https://github.com/jo-anb/simple-plant-extended",
                 "data": {
                     "photo": "Photo",
-                    "species": "Espèce/Variété"
+                        "species": "Espèce/Variété",
+                        "notify_services": "Services de notification",
+                        "notifications_enabled": "Activer les notifications",
+                        "dnd_start": "Début ne pas déranger",
+                    "dnd_end": "Fin ne pas déranger",
+                    "broadcast_enabled": "Activer la diffusion",
+                    "broadcast_services": "Services de diffusion",
+                    "broadcast_time_1": "Heure de diffusion 1",
+                    "broadcast_time_2": "Heure de diffusion 2"
                 }
             }
         },
@@ -83,6 +91,34 @@
         "sensor": {
             "next_watering": {
                 "name": "Prochain arrosage"
+            }
+        }
+    },
+    "component": {
+        "simple_plant_extended": {
+            "notification": {
+                "water_today_title": "🌱🫗 {plant} doit être arrosée aujourd'hui",
+                "water_late_title": "🌱🫗 L'arrosage de {plant} est en retard de {days} jours",
+                "water_message": "Appuyez ci-dessous lorsque vous avez arrosé {plant}.",
+                "fertilize_today_title": "🌱🫗 {plant} doit être fertilisée aujourd'hui",
+                "fertilize_message": "Appuyez ci-dessous lorsque vous avez fertilisé {plant}.",
+                "mist_today_title": "🌱🫗 {plant} doit être vaporisée aujourd'hui",
+                "mist_message": "Appuyez ci-dessous lorsque vous avez vaporisé {plant}.",
+                "clean_today_title": "🌱🫗 {plant} doit être nettoyée aujourd'hui",
+                "clean_message": "Appuyez ci-dessous lorsque vous avez nettoyé {plant}.",
+                "action_mark_done": "✅ Marquer comme fait",
+                "action_skip": "Ignorer"
+            },
+            "broadcast": {
+                "water_overdue": "Tâche en retard pour {plant}. {plant} devait être arrosée il y a {when}.",
+                "water_today": "{plant} doit être arrosée aujourd'hui.",
+                "fertilize_overdue": "Tâche en retard pour {plant}. {plant} devait recevoir de l'engrais {feed_type} il y a {when}.",
+                "fertilize_today": "{plant} doit recevoir de l'engrais {feed_type} aujourd'hui.",
+                "mist_overdue": "Tâche en retard pour {plant}. {plant} devait être vaporisée il y a {when}.",
+                "mist_today": "{plant} doit être vaporisée aujourd'hui.",
+                "clean_overdue": "Tâche en retard pour {plant}. {plant} devait être nettoyée il y a {when}.",
+                "clean_today": "{plant} doit être nettoyée aujourd'hui.",
+                "no_tasks": "Aucune tâche de plante pour le moment."
             }
         }
     },

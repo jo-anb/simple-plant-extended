@@ -20,7 +20,7 @@ from .const import (
 
 if TYPE_CHECKING:
     from homeassistant.config_entries import ConfigEntry
-    from homeassistant.core import HomeAssistant
+    from homeassistant.core import Event, HomeAssistant
     from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
     from .coordinator import SimplePlantExtendedCoordinator
@@ -125,7 +125,7 @@ class SimplePlantExtendedSelect(SelectEntity):
     async def async_added_to_hass(self) -> None:
         """Run when entity is added to hass."""
 
-        async def _select_updated(event: dict, new_value: str | None = None) -> None:
+        async def _select_updated(event: Event, new_value: str | None = None) -> None:
             if self.entity_description.key in ["cleaning_enabled", "misting_enabled"]:
                 subject = None
                 if self.entity_description.key == "misting_enabled":

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 from homeassistant.components.sensor import (
@@ -19,6 +19,8 @@ from homeassistant.util.dt import as_local
 from .const import DOMAIN
 
 if TYPE_CHECKING:
+    from datetime import date
+
     from homeassistant.config_entries import ConfigEntry
     from homeassistant.core import Event, EventStateChangedData, HomeAssistant
     from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -176,19 +178,14 @@ class SimplePlantExtendedSensor(SensorEntity):
         if not dates:
             return
 
-        # next_date = None
         key = None
         if "water" in self.entity_description.key:
-            # next_date = f"date.{DOMAIN}_next_watering_{self.device}"
             key = "next_watering"
         if "fertilization" in self.entity_description.key:
-            # next_date = f"date.{DOMAIN}_next_fertilization_{self.device}"
             key = "next_fertilization"
         if "misting" in self.entity_description.key:
-            # next_date = f"date.{DOMAIN}_next_misting_{self.device}"
             key = "next_misting"
         if "cleaning" in self.entity_description.key:
-            # next_date = f"date.{DOMAIN}_next_cleaning_{self.device}"
             key = "next_cleaning"
 
         # Color
