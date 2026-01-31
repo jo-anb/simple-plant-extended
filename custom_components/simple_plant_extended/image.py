@@ -79,6 +79,11 @@ class SimplePlantExtendedImage(ImageEntity):
         """Return the device name."""
         return self.coordinator.device
 
+    @property
+    def state(self) -> str | None:
+        """Return the device name as state."""
+        return self.coordinator.device
+
 
     def _get_content_type(self, path: Path) -> str:
         """Get the content type of the image based on its extension."""
