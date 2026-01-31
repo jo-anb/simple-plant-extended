@@ -48,7 +48,13 @@
     "options": {
         "step": {
             "init": {
-                "description": "Modifiez les détails de la plante ou les paramètres de notification. Si vous avez besoin d'aide, allez jeter un oeil ici : https://github.com/jo-anb/simple-plant-extended",
+                "description": "Choisissez ce que vous souhaitez configurer. Si vous avez besoin d'aide, allez jeter un oeil ici : https://github.com/jo-anb/simple-plant-extended",
+                "data": {
+                    "scope": "Périmètre de configuration"
+                }
+            },
+            "plant": {
+                "description": "Modifiez les détails de la plante. Si vous avez besoin d'aide, allez jeter un oeil ici : https://github.com/jo-anb/simple-plant-extended",
                 "data": {
                     "photo": "Photo",
                     "species": "Espèce/Variété (Optionnel)",
@@ -61,7 +67,12 @@
                     "humidity_sensor": "Capteur d'humidité (Optionnel)",
                     "temperature_sensor": "Capteur de température (Optionnel)",
                     "light_sensor": "Capteur de lumière (Optionnel)",
-                    "notes": "Notes (Optionnel)",
+                    "notes": "Notes (Optionnel)"
+                }
+            },
+            "integration": {
+                "description": "Configurez les notifications et la diffusion pour toute l'intégration (s'applique à toutes les plantes).",
+                "data": {
                     "notify_services": "Services de notification",
                     "notifications_enabled": "Activer les notifications",
                     "dnd_start": "Début ne pas déranger",

@@ -112,6 +112,7 @@ class SimplePlantExtendedSensor(SensorEntity):
         """Initialize the sensor class."""
         super().__init__()
         self.entity_description = description
+        self.entry = entry
         self._fallback_value: date | None = None
         self._attr_native_value: date | None = None
         self.coordinator: SimplePlantExtendedCoordinator = hass.data[DOMAIN][
@@ -134,15 +135,6 @@ class SimplePlantExtendedSensor(SensorEntity):
     def device(self) -> str | None:
         """Return the device name."""
         return self.coordinator.device
-
-    @property
-    def extra_state_attributes(self) -> dict:
-        """Return device attributes merged with state attributes."""
-        attrs: dict = {}
-        if self._attr_extra_state_attributes:
-            attrs.update(self._attr_extra_state_attributes)
-        attrs.update(self.coordinator.device_attributes)
-        return attrs
 
     @property
     def native_value(self) -> date | None:
@@ -253,10 +245,13 @@ class SimplePlantExtendedSensor(SensorEntity):
 
     @property
     def extra_state_attributes(self) -> dict:
-        """Return device attributes for status sensor only."""
-        if self.entity_description.key != "status":
-            return {}
-        return dict(self.coordinator.device_attributes)
+        """Return extra state attributes."""
+        attrs: dict = {}
+        if self._attr_extra_state_attributes:
+            attrs.update(self._attr_extra_state_attributes)
+        if self.entity_description.key == "status":
+            attrs.update(self.coordinator.device_attributes)
+        return attrs
 
     async def _update_status(self, _event: Event | None = None) -> None:
         """Update status based on todo sensors."""
@@ -273,9 +268,6 @@ class SimplePlantExtendedSensor(SensorEntity):
         )
         self._attr_native_value = "open_tasks" if has_tasks else "ok"
         self.async_write_ha_state()
-
-        # Initial update
-        await self._update_state()
 
     async def _update_state(
         self, _event: Event[EventStateChangedData] | datetime | None = None

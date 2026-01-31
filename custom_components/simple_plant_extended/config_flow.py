@@ -358,6 +358,23 @@ def option_form(suggested_species: str | None = None) -> vol.Schema:
     )
 
 
+def scope_form() -> vol.Schema:
+    """Return scope selection form."""
+    return vol.Schema(
+        {
+            vol.Required("scope"): selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    {
+                        "options": ["plant", "integration"],
+                        "custom_value": False,
+                        "sort": False,
+                    }
+                )
+            )
+        }
+    )
+
+
 def notification_options_form(
     available_notify_services: list[str],
     selected_notify_services: list[str],
@@ -504,6 +521,59 @@ class SimplePlantExtendedOptionFlowHandler(OptionsFlow):
         1st call = return form to show
         2nd call = return form with user input
         """
+        if user_input is None:
+            return self.async_show_form(step_id="init", data_schema=scope_form())
+
+        if user_input.get("scope") == "plant":
+            return await self.async_step_plant()
+        if user_input.get("scope") == "integration":
+            return await self.async_step_integration()
+        return self.async_show_form(step_id="init", data_schema=scope_form())
+
+    async def async_step_plant(self, user_input: dict | None = None) -> ConfigFlowResult:
+        """Handle plant-specific options."""
+        form = option_form(self.entry.data.get("species"))
+
+        if user_input is None:
+            return self.async_show_form(step_id="plant", data_schema=form)
+
+        data = dict(self.entry.data)
+        if user_input.get("species"):
+            data["species"] = user_input["species"]
+
+        for key in (
+            "size",
+            "location",
+            "distance_to_window",
+            "pot_diameter",
+            "soil_type",
+            "acquisition_date",
+            "humidity_sensor",
+            "temperature_sensor",
+            "light_sensor",
+            "notes",
+        ):
+            if key in user_input:
+                data[key] = user_input[key]
+
+        if user_input.get("photo"):
+            try:
+                file_id = user_input["photo"]
+                data["photo"] = await save_image(self.hass, file_id)
+                remove_photo(self.hass, self.entry)
+            except ValueError:
+                return self.async_show_form(
+                    step_id="plant",
+                    errors={"base": "upload_failed_type"},
+                )
+
+        self.hass.config_entries.async_update_entry(self.entry, data=data)
+        return self.async_create_entry(title=None, data={})
+
+    async def async_step_integration(
+        self, user_input: dict | None = None
+    ) -> ConfigFlowResult:
+        """Handle integration-level notification and broadcast options."""
         available_notify_services = self._get_notify_services_options()
         current_options = self._get_current_notification_options()
         available_broadcast_services = self._get_broadcast_services_options(
@@ -512,7 +582,6 @@ class SimplePlantExtendedOptionFlowHandler(OptionsFlow):
 
         form = vol.Schema(
             {
-                **option_form(self.entry.data.get("species")).schema,
                 **notification_options_form(
                     available_notify_services=available_notify_services,
                     selected_notify_services=current_options[CONF_NOTIFY_SERVICES],
@@ -533,98 +602,9 @@ class SimplePlantExtendedOptionFlowHandler(OptionsFlow):
         )
 
         if user_input is None:
-            # 1st call
-            return self.async_show_form(step_id="init", data_schema=form)
-        # 2nd call
-        if user_input.get("species"):
-            self.user_inputs["species"] = user_input["species"]
+            return self.async_show_form(step_id="integration", data_schema=form)
 
-        for key in (
-            "size",
-            "location",
-            "distance_to_window",
-            "pot_diameter",
-            "soil_type",
-            "acquisition_date",
-            "humidity_sensor",
-            "temperature_sensor",
-            "light_sensor",
-            "notes",
-        ):
-            if key in user_input:
-                self.user_inputs[key] = user_input[key]
-
-        if user_input.get("photo"):
-            try:
-                file_id = user_input["photo"]
-                self.user_inputs["photo"] = await save_image(self.hass, file_id)
-                remove_photo(self.hass, self.entry)
-            except ValueError:
-                return self.async_show_form(
-                    step_id="user",
-                    errors={"base": "upload_failed_type"},
-                )
-
-        if CONF_NOTIFY_SERVICES in user_input:
-            self.user_inputs[CONF_NOTIFY_SERVICES] = user_input[CONF_NOTIFY_SERVICES]
-
-        if CONF_NOTIFICATIONS_ENABLED in user_input:
-            self.user_inputs[CONF_NOTIFICATIONS_ENABLED] = user_input[
-                CONF_NOTIFICATIONS_ENABLED
-            ]
-
-        if CONF_DND_START in user_input:
-            self.user_inputs[CONF_DND_START] = user_input[CONF_DND_START]
-
-        if CONF_DND_END in user_input:
-            self.user_inputs[CONF_DND_END] = user_input[CONF_DND_END]
-
-        if CONF_BROADCAST_ENABLED in user_input:
-            self.user_inputs[CONF_BROADCAST_ENABLED] = user_input[
-                CONF_BROADCAST_ENABLED
-            ]
-
-        if CONF_BROADCAST_SERVICES in user_input:
-            self.user_inputs[CONF_BROADCAST_SERVICES] = user_input[
-                CONF_BROADCAST_SERVICES
-            ]
-
-        if CONF_BROADCAST_TIME_1 in user_input:
-            self.user_inputs[CONF_BROADCAST_TIME_1] = user_input[CONF_BROADCAST_TIME_1]
-
-        if CONF_BROADCAST_TIME_2 in user_input:
-            self.user_inputs[CONF_BROADCAST_TIME_2] = user_input[CONF_BROADCAST_TIME_2]
-
-        # On appelle le step de fin pour enregistrer les modifications
-        return await self.async_end()
-
-    async def async_end(self) -> ConfigFlowResult:
-        """Finitsh ConfigEntry modification."""
-        LOGGER.info(
-            "Entry %s is being recreated",
-            self.config_entry.entry_id,
-        )
-
-        data = dict(self.config_entry.data)
-        options = dict(self.config_entry.options)
-
-        for key in (
-            "species",
-            "photo",
-            "size",
-            "location",
-            "distance_to_window",
-            "pot_diameter",
-            "soil_type",
-            "acquisition_date",
-            "humidity_sensor",
-            "temperature_sensor",
-            "light_sensor",
-            "notes",
-        ):
-            if key in self.user_inputs:
-                data[key] = self.user_inputs[key]
-
+        options = dict(self.entry.options)
         for key in (
             CONF_NOTIFY_SERVICES,
             CONF_NOTIFICATIONS_ENABLED,
@@ -635,16 +615,13 @@ class SimplePlantExtendedOptionFlowHandler(OptionsFlow):
             CONF_BROADCAST_TIME_1,
             CONF_BROADCAST_TIME_2,
         ):
-            if key in self.user_inputs:
-                options[key] = self.user_inputs[key]
+            if key in user_input:
+                options[key] = user_input[key]
 
-        self.hass.config_entries.async_update_entry(
-            self.config_entry, data=data, options=options
-        )
+        self.hass.config_entries.async_update_entry(self.entry, options=options)
 
-        # Propagate notification settings to all entries (integration-level)
         for entry in self.hass.config_entries.async_entries(domain=DOMAIN):
-            if entry.entry_id == self.config_entry.entry_id:
+            if entry.entry_id == self.entry.entry_id:
                 continue
             self.hass.config_entries.async_update_entry(entry, options=options)
 
@@ -652,11 +629,7 @@ class SimplePlantExtendedOptionFlowHandler(OptionsFlow):
         if manager is not None:
             await manager.async_refresh()
 
-        return self.async_create_entry(
-            # No data as config entry has been modified
-            title=None,
-            data={},
-        )
+        return self.async_create_entry(title=None, data={})
 
     def _get_notify_services_options(self) -> list[str]:
         """Get list of available notify services with full service names."""

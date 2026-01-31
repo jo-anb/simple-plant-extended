@@ -49,7 +49,13 @@
         "options": {
                 "step": {
                         "init": {
-                                "description": "Werk plantdetails of meldingsinstellingen bij. Als je hulp nodig hebt, kijk dan hier: https://github.com/jo-anb/simple-plant-extended",
+                                "description": "Kies wat je wilt configureren. Als je hulp nodig hebt, kijk dan hier: https://github.com/jo-anb/simple-plant-extended",
+                                "data": {
+                                        "scope": "Configuratie‑scope"
+                                }
+                        },
+                        "plant": {
+                                "description": "Werk plantdetails bij. Als je hulp nodig hebt, kijk dan hier: https://github.com/jo-anb/simple-plant-extended",
                                 "data": {
                                         "photo": "Foto",
                                         "species": "Soort/Variëteit (optioneel)",
@@ -62,7 +68,12 @@
                                         "humidity_sensor": "Vochtigheidssensor (optioneel)",
                                         "temperature_sensor": "Temperatuursensor (optioneel)",
                                         "light_sensor": "Lichtsensor (optioneel)",
-                                        "notes": "Notities (optioneel)",
+                                        "notes": "Notities (optioneel)"
+                                }
+                        },
+                        "integration": {
+                                "description": "Stel notificaties en broadcast in voor de hele integratie (geldt voor alle planten).",
+                                "data": {
                                         "notify_services": "Meldingsservices",
                                         "notifications_enabled": "Meldingen inschakelen",
                                         "dnd_start": "Niet storen start",

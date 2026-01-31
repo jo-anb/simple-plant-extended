@@ -48,10 +48,16 @@
     "options": {
         "step": {
             "init": {
-                    "description": "Modify plant details or notification settings. If you need help with the configuration have a look here: https://github.com/jo-anb/simple-plant-extended",
+                "description": "Choose what you want to configure. If you need help, have a look here: https://github.com/jo-anb/simple-plant-extended",
+                "data": {
+                    "scope": "Configuration scope"
+                }
+            },
+            "plant": {
+                "description": "Modify plant details. If you need help, have a look here: https://github.com/jo-anb/simple-plant-extended",
                 "data": {
                     "photo": "Photo",
-                        "species": "Species/Variety of your plant (Optional)",
+                    "species": "Species/Variety of your plant (Optional)",
                     "size": "Plant size (Optional)",
                     "location": "Location (Optional)",
                     "distance_to_window": "Distance to window (Optional)",
@@ -61,10 +67,15 @@
                     "humidity_sensor": "Humidity sensor (Optional)",
                     "temperature_sensor": "Temperature sensor (Optional)",
                     "light_sensor": "Light sensor (Optional)",
-                    "notes": "Notes (Optional)",
-                        "notify_services": "Notification services",
-                        "notifications_enabled": "Enable notifications",
-                        "dnd_start": "Do not disturb start",
+                    "notes": "Notes (Optional)"
+                }
+            },
+            "integration": {
+                "description": "Configure notifications and broadcast for the whole integration (applies to all plants).",
+                "data": {
+                    "notify_services": "Notification services",
+                    "notifications_enabled": "Enable notifications",
+                    "dnd_start": "Do not disturb start",
                     "dnd_end": "Do not disturb end",
                     "broadcast_enabled": "Enable broadcast",
                     "broadcast_services": "Broadcast services",
