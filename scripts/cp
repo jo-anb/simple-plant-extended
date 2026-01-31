@@ -3,16 +3,24 @@
 set -e
 
 cd "$(dirname "$0")/.."
+hass_dir="\\/192.168.2.51"
 
-echo "Copying card"
-mkdir -p ${PWD}/config/www/community/simple-plant-extended-card/
-cp -r "${PWD}"/simple-plant-card/dist/* \
-   "${PWD}/config/www/community/simple-plant-extended-card/"
 
-if [[ "$1" == "--all" ]]
+if [[ "$1" == "--all" ]] || [[ "$1" == "--card" ]]
+then
+    echo "Copying card"
+
+    npm run build
+
+    mkdir -p ${PWD}/config/www/community/simple-plant-extended-card/
+    cp -r "${PWD}"/simple-plant-card/dist/* \
+    "${hass_dir}/config/www/community/simple-plant-extended-card/"
+fi
+
+if [[ "$1" == "--all" ]] || [[ "$1" == "--component" ]]
 then
     echo "Copying component"
     mkdir -p "${PWD}/config/custom_components/simple_plant_extended/"
     cp -r "${PWD}"/custom_components/simple_plant_extended/* \
-        "${PWD}/config/custom_components/simple_plant_extended/";
+    "${hass_dir}/config/custom_components/simple_plant_extended/"
 fi
