@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING, Any
 
 from homeassistant.exceptions import ServiceValidationError
@@ -22,6 +22,8 @@ if TYPE_CHECKING:
 
 class SimplePlantExtendedCoordinator(DataUpdateCoordinator[dict]):
     """Class to manage fetching Simple Plant Extended data."""
+
+    _max_activity_log = 200
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
         """Initialize the coordinator."""
@@ -52,9 +54,44 @@ class SimplePlantExtendedCoordinator(DataUpdateCoordinator[dict]):
     def device_attributes(self) -> dict[str, Any]:
         """Return config entry data as device attributes."""
         data = dict(self.config_entry.data)
-        if self.data and "notes_log" in self.data:
-            data["notes_log"] = self.data["notes_log"]
+        if self.data:
+            if "notes_log" in self.data:
+                data["notes_log"] = self.data["notes_log"]
+            if "activity_log" in self.data:
+                data["activity_log"] = self.data["activity_log"]
         return {key: value for key, value in data.items() if value not in (None, "")}
+
+    async def async_log_activity(
+        self,
+        action: str,
+        *,
+        entity_id: str | None = None,
+        old: str | None = None,
+        new: str | None = None,
+        note: str | None = None,
+    ) -> None:
+        """Append an activity log entry for this device."""
+        timestamp = datetime.now(timezone.utc).isoformat()
+        entry: dict[str, Any] = {
+            "timestamp": timestamp,
+            "action": action,
+        }
+        if entity_id is not None:
+            entry["entity_id"] = entity_id
+        if old is not None:
+            entry["old"] = old
+        if new is not None:
+            entry["new"] = new
+        if note is not None:
+            entry["note"] = note
+
+        current = await self.store.async_get_data(self.device)
+        activity_log = list(current.get("activity_log", []))
+        activity_log.append(entry)
+        if len(activity_log) > self._max_activity_log:
+            activity_log = activity_log[-self._max_activity_log :]
+
+        await self.store.async_save_data(self.device, {"activity_log": activity_log})
 
     async def remove_device_from_storage(self) -> None:
         """Remove entry in storage."""

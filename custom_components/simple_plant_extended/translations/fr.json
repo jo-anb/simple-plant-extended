@@ -308,6 +308,46 @@
             }
         }
     },
+    "services": {
+        "add_note": {
+            "name": "Ajouter une note",
+            "description": "Ajouter une note à la chronologie de la plante.",
+            "fields": {
+                "entity_id": {
+                    "name": "Entité",
+                    "description": "Toute entité Simple Plant pour la plante cible."
+                },
+                "note": {
+                    "name": "Note",
+                    "description": "Le texte de la note à ajouter."
+                }
+            }
+        }
+    },
+    "logbook": {
+        "watered": "Arrosage : {old} → {new}",
+        "fertilized": "Fertilisation : {old} → {new}",
+        "misted": "Brumisation : {old} → {new}",
+        "cleaned": "Nettoyage : {old} → {new}",
+        "location_changed": "Emplacement modifié : {old} → {new}",
+        "size_changed": "Taille modifiée : {old} → {new}",
+        "soil_type_changed": "Type de sol modifié : {old} → {new}",
+        "feed_method_changed": "Méthode de fertilisation modifiée : {old} → {new}",
+        "illumination_changed": "Lumière modifiée : {old} → {new}",
+        "health_changed": "Santé modifiée : {old} → {new}",
+        "misting_setting_changed": "Paramètre de brumisation modifié : {old} → {new}",
+        "cleaning_setting_changed": "Paramètre de nettoyage modifié : {old} → {new}",
+        "distance_to_window_changed": "Distance à la fenêtre modifiée : {old} → {new}",
+        "pot_diameter_changed": "Diamètre du pot modifié : {old} → {new}",
+        "watering_interval_changed": "Intervalle d'arrosage modifié : {old} → {new}",
+        "fertilization_interval_changed": "Intervalle de fertilisation modifié : {old} → {new}",
+        "misting_interval_changed": "Intervalle de brumisation modifié : {old} → {new}",
+        "cleaning_interval_changed": "Intervalle de nettoyage modifié : {old} → {new}",
+        "notes_updated": "Notes modifiées : {old} → {new}",
+        "species_updated": "Espèce/Variété modifiée : {old} → {new}",
+        "image_updated": "Image modifiée : {old} → {new}",
+        "note_added": "Note ajoutée : {note}"
+    },
     "exceptions": {
         "invalid_future_date": {
             "message": "Impossible de définir une date d'arrosage dans le futur."

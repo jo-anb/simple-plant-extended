@@ -309,6 +309,46 @@
                         }
                 }
         },
+        "services": {
+                "add_note": {
+                        "name": "Notitie toevoegen",
+                        "description": "Voeg een notitie toe aan de plant‑tijdlijn.",
+                        "fields": {
+                                "entity_id": {
+                                        "name": "Entiteit",
+                                        "description": "Elke Simple Plant‑entiteit voor de doelplant."
+                                },
+                                "note": {
+                                        "name": "Notitie",
+                                        "description": "De notitietekst om toe te voegen."
+                                }
+                        }
+                }
+        },
+        "logbook": {
+                "watered": "Water gegeven: {old} → {new}",
+                "fertilized": "Bemesting: {old} → {new}",
+                "misted": "Beneveld: {old} → {new}",
+                "cleaned": "Gereinigd: {old} → {new}",
+                "location_changed": "Locatie gewijzigd: {old} → {new}",
+                "size_changed": "Grootte gewijzigd: {old} → {new}",
+                "soil_type_changed": "Soort potgrond gewijzigd: {old} → {new}",
+                "feed_method_changed": "Voedingsmethode gewijzigd: {old} → {new}",
+                "illumination_changed": "Lichtbehoefte gewijzigd: {old} → {new}",
+                "health_changed": "Gezondheid gewijzigd: {old} → {new}",
+                "misting_setting_changed": "Beneveling instelling gewijzigd: {old} → {new}",
+                "cleaning_setting_changed": "Reiniging instelling gewijzigd: {old} → {new}",
+                "distance_to_window_changed": "Afstand tot raam gewijzigd: {old} → {new}",
+                "pot_diameter_changed": "Potdiameter gewijzigd: {old} → {new}",
+                "watering_interval_changed": "Wateringsinterval gewijzigd: {old} → {new}",
+                "fertilization_interval_changed": "Bemestingsinterval gewijzigd: {old} → {new}",
+                "misting_interval_changed": "Benevelingsinterval gewijzigd: {old} → {new}",
+                "cleaning_interval_changed": "Reinigingsinterval gewijzigd: {old} → {new}",
+                "notes_updated": "Notities gewijzigd: {old} → {new}",
+                "species_updated": "Soort/Variëteit gewijzigd: {old} → {new}",
+                "image_updated": "Afbeelding gewijzigd: {old} → {new}",
+                "note_added": "Notitie toegevoegd: {note}"
+        },
         "exceptions": {
                 "invalid_future_date": {
                         "message": "Je kunt geen datum in de toekomst instellen."

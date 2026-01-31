@@ -13,8 +13,10 @@ from typing import TYPE_CHECKING
 import voluptuous as vol
 from homeassistant.components.logbook import async_log_entry
 from homeassistant.config_entries import ConfigEntryState
-from homeassistant.core import async_get_hass
+from homeassistant.const import EVENT_STATE_CHANGED
+from homeassistant.core import Event, async_get_hass
 from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers.translation import async_get_translations
 from homeassistant.helpers.config_validation import config_entry_only_config_schema
 from homeassistant.helpers.device_registry import (
     EVENT_DEVICE_REGISTRY_UPDATED,
@@ -40,11 +42,116 @@ CONFIG_SCHEMA = config_entry_only_config_schema(DOMAIN)
 SERVICE_ADD_NOTE = "add_note"
 NOTE_LOG_KEY = "notes_log"
 MAX_NOTES_LOG = 100
+ACTIVITY_LOG_KEY = "activity_log"
+
+
+async def _get_logbook_message(
+    hass: HomeAssistant,
+    action: str,
+    *,
+    old: str | None = None,
+    new: str | None = None,
+    note: str | None = None,
+) -> str | None:
+    language = hass.config.language
+    cache = hass.data.setdefault(DOMAIN, {}).setdefault("_logbook_translations", {})
+    translations = cache.get(language)
+    if translations is None:
+        translations = await async_get_translations(
+            hass, language, "logbook", {DOMAIN}
+        )
+        cache[language] = translations
+
+    key = f"{DOMAIN}.logbook.{action}"
+    template = translations.get(key)
+    if not template:
+        return None
+
+    return template.format(
+        old=old or "",
+        new=new or "",
+        note=note or "",
+    )
 
 
 async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
     """Set up the Simple Plant component."""
     hass.data.setdefault(DOMAIN, {})
+
+    async def async_state_changed(event: Event) -> None:
+        entity_id = event.data.get("entity_id")
+        if not entity_id or f"{DOMAIN}_" not in entity_id:
+            return
+
+        old_state = event.data.get("old_state")
+        new_state = event.data.get("new_state")
+        if not old_state or not new_state:
+            return
+        if old_state.state == new_state.state:
+            return
+
+        suffix = entity_id.split(f"{DOMAIN}_", 1)[1]
+        if "_" not in suffix:
+            return
+        key, device = suffix.rsplit("_", 1)
+
+        action_map = {
+            "last_watered": "watered",
+            "last_fertilized": "fertilized",
+            "last_misted": "misted",
+            "last_cleaned": "cleaned",
+            "location": "location_changed",
+            "size": "size_changed",
+            "soil_type": "soil_type_changed",
+            "feed_method": "feed_method_changed",
+            "illumination": "illumination_changed",
+            "health": "health_changed",
+            "misting_enabled": "misting_setting_changed",
+            "cleaning_enabled": "cleaning_setting_changed",
+            "distance_to_window": "distance_to_window_changed",
+            "pot_diameter": "pot_diameter_changed",
+            "days_between_waterings": "watering_interval_changed",
+            "days_between_fertilizations": "fertilization_interval_changed",
+            "days_between_mistings": "misting_interval_changed",
+            "days_between_cleanings": "cleaning_interval_changed",
+            "notes": "notes_updated",
+            "species": "species_updated",
+            "picture": "image_updated",
+        }
+
+        action = action_map.get(key)
+        if action is None:
+            return
+
+        coordinator: SimplePlantExtendedCoordinator | None = None
+        for value in hass.data.get(DOMAIN, {}).values():
+            if isinstance(value, SimplePlantExtendedCoordinator) and value.device == device:
+                coordinator = value
+                break
+        if coordinator is None:
+            return
+
+        await coordinator.async_log_activity(
+            action,
+            entity_id=entity_id,
+            old=old_state.state,
+            new=new_state.state,
+        )
+
+        message = await _get_logbook_message(
+            hass,
+            action,
+            old=old_state.state,
+            new=new_state.state,
+        )
+        if message is not None:
+            async_log_entry(
+                hass,
+                DOMAIN,
+                coordinator.config_entry.title,
+                message,
+                entity_id=entity_id,
+            )
 
     async def async_add_note_service(call) -> None:  # type: ignore[no-untyped-def]
         entity_id = call.data.get("entity_id")
@@ -75,6 +182,12 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
         )
         await coordinator.async_refresh()
 
+        await coordinator.async_log_activity(
+            "note_added",
+            entity_id=entity_id,
+            note=note,
+        )
+
         hass.bus.async_fire(
             f"{DOMAIN}_note_added",
             {
@@ -84,11 +197,12 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
             },
         )
 
+        message = await _get_logbook_message(hass, "note_added", note=note)
         async_log_entry(
             hass,
             DOMAIN,
             coordinator.config_entry.title,
-            f"Note added: {note}",
+            message or f"Note added: {note}",
             entity_id=entity_id,
         )
 
@@ -96,6 +210,8 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
     manager = NotificationManager(hass)
     hass.data[DOMAIN]["notification_manager"] = manager
     await manager.async_start()
+
+    hass.bus.async_listen(EVENT_STATE_CHANGED, async_state_changed)
 
     hass.services.async_register(
         DOMAIN,
