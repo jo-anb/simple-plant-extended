@@ -87,6 +87,10 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
         new_state = event.data.get("new_state")
         if not old_state or not new_state:
             return
+        if old_state.state in {"unknown", "unavailable"}:
+            return
+        if new_state.state in {"unknown", "unavailable"}:
+            return
         if old_state.state == new_state.state:
             return
 
