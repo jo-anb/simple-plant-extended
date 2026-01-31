@@ -1,1 +1,17 @@
-# No services defined. Notifications and broadcasts run at runtime.
+add_note:
+  name: Add note
+  description: Add a note to the plant timeline and fire a logbook entry.
+  fields:
+    entity_id:
+      name: Entity
+      description: Any Simple Plant entity for the target plant.
+      required: true
+      selector:
+        entity: {}
+    note:
+      name: Note
+      description: The note text to append.
+      required: true
+      selector:
+        text:
+          multiline: true

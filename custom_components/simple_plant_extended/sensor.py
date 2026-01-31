@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 from typing import TYPE_CHECKING
 
 from homeassistant.components.sensor import (
@@ -14,13 +14,11 @@ from homeassistant.helpers.event import (
     async_track_state_change_event,
     async_track_time_change,
 )
-from homeassistant.util.dt import as_local
+from homeassistant.util.dt import as_local, utcnow
 
 from .const import DOMAIN
 
 if TYPE_CHECKING:
-    from datetime import date
-
     from homeassistant.config_entries import ConfigEntry
     from homeassistant.core import Event, EventStateChangedData, HomeAssistant
     from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -53,14 +51,31 @@ ENTITY_DESCRIPTIONS = (
         translation_key="next_cleaning",
         icon="mdi:clipboard-text-clock",
     ),
-    # SensorEntityDescription(
-    #     device_class=None,
-    #     state_class=SensorStateClass.str,
-    #     native_unit_of_measurement=state
-    #     key="species",
-    #     translation_key="species",
-    #     icon="mdi:plant-tree",
-    # ),
+    SensorEntityDescription(
+        key="current_humidity",
+        translation_key="current_humidity",
+        device_class=SensorDeviceClass.HUMIDITY,
+        native_unit_of_measurement="%",
+        icon="mdi:water-percent",
+    ),
+    SensorEntityDescription(
+        key="current_temperature",
+        translation_key="current_temperature",
+        device_class=SensorDeviceClass.TEMPERATURE,
+        icon="mdi:thermometer",
+    ),
+    SensorEntityDescription(
+        key="current_light",
+        translation_key="current_light",
+        device_class=SensorDeviceClass.ILLUMINANCE,
+        icon="mdi:brightness-6",
+    ),
+    SensorEntityDescription(
+        key="plant_age_days",
+        translation_key="plant_age_days",
+        native_unit_of_measurement="days",
+        icon="mdi:calendar-clock",
+    ),
 )
 
 COLOR_MAPPING = {"Today": "Goldenrod", "Late": "Tomato"}
@@ -116,6 +131,15 @@ class SimplePlantExtendedSensor(SensorEntity):
         return self.coordinator.device
 
     @property
+    def extra_state_attributes(self) -> dict:
+        """Return device attributes merged with state attributes."""
+        attrs: dict = {}
+        if self._attr_extra_state_attributes:
+            attrs.update(self._attr_extra_state_attributes)
+        attrs.update(self.coordinator.device_attributes)
+        return attrs
+
+    @property
     def native_value(self) -> date | None:
         """Return true if the binary_sensor is on."""
         return (
@@ -127,6 +151,44 @@ class SimplePlantExtendedSensor(SensorEntity):
     async def async_added_to_hass(self) -> None:
         """Run when entity is added to hass."""
         await super().async_added_to_hass()
+
+        # Handle linked sensor entities (humidity, temperature, light)
+        if self.entity_description.key in ["current_humidity", "current_temperature", "current_light"]:
+            sensor_key_map = {
+                "current_humidity": "humidity_sensor",
+                "current_temperature": "temperature_sensor",
+                "current_light": "light_sensor",
+            }
+            sensor_entity_id = self.entry.data.get(sensor_key_map[self.entity_description.key])
+
+            if sensor_entity_id:
+                self.async_on_remove(
+                    async_track_state_change_event(
+                        self.hass,
+                        sensor_entity_id,
+                        self._update_linked_sensor,
+                    )
+                )
+            # Initial update
+            await self._update_linked_sensor()
+            return
+
+        # Handle plant age sensor
+        if self.entity_description.key == "plant_age_days":
+            self.async_on_remove(
+                async_track_time_change(
+                    self.hass,
+                    self._update_plant_age,
+                    hour=0,
+                    minute=0,
+                    second=0,
+                )
+            )
+            # Initial update
+            await self._update_plant_age()
+            return
+
+        # Existing date sensors logic
         last_date = None
         daysbetween = None
         if "watering" in self.entity_description.key:
@@ -210,4 +272,60 @@ class SimplePlantExtendedSensor(SensorEntity):
 
         # Value
         self._attr_native_value = next_action_date
+        self.async_write_ha_state()
+
+    async def _update_linked_sensor(
+        self, _event: Event[EventStateChangedData] | None = None
+    ) -> None:
+        """Update sensor value from linked external sensor."""
+        sensor_key_map = {
+            "current_humidity": "humidity_sensor",
+            "current_temperature": "temperature_sensor",
+            "current_light": "light_sensor",
+        }
+
+        sensor_entity_id = self.entry.data.get(sensor_key_map[self.entity_description.key])
+
+        if not sensor_entity_id:
+            self._attr_native_value = None
+            self._attr_available = False
+            self.async_write_ha_state()
+            return
+
+        state = self.hass.states.get(sensor_entity_id)
+        if state and state.state not in ["unknown", "unavailable", None]:
+            try:
+                self._attr_native_value = float(state.state)
+                self._attr_available = True
+            except (ValueError, TypeError):
+                self._attr_native_value = None
+                self._attr_available = False
+        else:
+            self._attr_native_value = None
+            self._attr_available = False
+
+        self.async_write_ha_state()
+
+    async def _update_plant_age(
+        self, _event: datetime | None = None
+    ) -> None:
+        """Update plant age in days."""
+        acquisition_date = self.entry.data.get("acquisition_date")
+
+        if not acquisition_date:
+            self._attr_native_value = None
+            self._attr_available = False
+            self.async_write_ha_state()
+            return
+
+        try:
+            acq_date = date.fromisoformat(acquisition_date)
+            today = utcnow().date()
+            age_days = (today - acq_date).days
+            self._attr_native_value = age_days
+            self._attr_available = True
+        except (ValueError, TypeError):
+            self._attr_native_value = None
+            self._attr_available = False
+
         self.async_write_ha_state()

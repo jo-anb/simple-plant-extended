@@ -1,231 +1,317 @@
+
 {
-  "config": {
-    "step": {
-      "user": {
-        "description": "Geef basisinformatie voor je nieuwe plant. Hulp nodig bij de configuratie? Zie: https://github.com/jo-anb/simple-plant-extended",
-        "data": {
-          "name": "Naam",
-          "last_watered": "Laatst bewaterd",
-          "last_fertilized": "Laatst gevoeden",
-          "last_misted": "Laatst beneveld (optioneel)",
-          "last_cleaned": "Laatst schoongemaakt (optioneel)",
-          "days_between_waterings": "Dagen tussen bewatering",
-          "days_between_fertilizations": "Dagen tussen voeding",
-          "days_between_mistings": "Dagen tussen beneveling (optioneel)",
-          "days_between_cleanings": "Dagen tussen schoonmaak (optioneel)",
-          "feed_method": "voedingsmethode",
-          "illumination": "Lichtbehoefte",
-          "photo": "Foto",
-          "health": "Huidige gezondheid (optioneel)",
-          "misting_enabled": "Plant moet beneveld worden",
-          "cleaning_enabled": "Plant moet schoongemaakt worden",
-          "enabled": "Ingeschakeld",
-          "species": "Soort/variëteit van je plant (optioneel)"
+        "config": {
+                "step": {
+                        "user": {
+                                "description": "Basisinformatie over je plant. Als je hulp nodig hebt, kijk dan hier: https://github.com/jo-anb/simple-plant-extended",
+                                "data": {
+                                        "name": "Naam",
+                                        "last_watered": "Laatst water gegeven",
+                                        "last_fertilized": "Laatst bemest",
+                                        "last_misted": "Laatst beneveld (optioneel)",
+                                        "last_cleaned": "Laatst gereinigd (optioneel)",
+                                        "days_between_waterings": "Aantal dagen tussen het water geven",
+                                        "days_between_fertilizations": "Dagen tussen bemesten",
+                                        "days_between_mistings": "Dagen tussen benevelen (optioneel)",
+                                        "days_between_cleanings": "Dagen tussen reinigen (optioneel)",
+                                        "feed_method": "Bemestingsmethode",
+                                        "illumination": "Lichtbehoefte",
+                                        "photo": "Foto",
+                                        "health": "Huidige gezondheid (optioneel)",
+                                        "misting_enabled": "Plant moet beneveld worden",
+                                        "cleaning_enabled": "Plant moet gereinigd worden",
+                                        "enabled": "Ingeschakeld",
+                                        "species": "Soort/variëteit van je plant (optioneel)",
+                                        "size": "Plantgrootte (optioneel)",
+                                        "location": "Locatie (optioneel)",
+                                        "distance_to_window": "Afstand tot het raam (optioneel)",
+                                        "pot_diameter": "Potdiameter (optioneel)",
+                                        "soil_type": "Soort potgrond (optioneel)",
+                                        "acquisition_date": "Aanschafdatum (optioneel)",
+                                        "humidity_sensor": "Vochtigheidssensor (optioneel)",
+                                        "temperature_sensor": "Temperatuursensor (optioneel)",
+                                        "light_sensor": "Lichtsensor (optioneel)",
+                                        "notes": "Notities (optioneel)"
+                                }
+                        }
+                },
+                "error": {
+                        "invalid_future_date": "Je kunt geen datum in de toekomst instellen.",
+                        "name_exist": "Er bestaat al een plant met deze naam.",
+                        "upload_failed_generic": "Er is iets misgegaan, de afbeelding is niet opgeslagen.",
+                        "upload_failed_type": "Dit bestandstype wordt niet ondersteund, de afbeelding is niet opgeslagen.",
+                        "unknown": "Er is een onbekende fout opgetreden."
+                },
+                "abort": {
+                        "already_configured": "Deze invoer is al geconfigureerd."
+                }
+        },
+        "options": {
+                "step": {
+                        "init": {
+                                "description": "Werk plantdetails of meldingsinstellingen bij. Als je hulp nodig hebt, kijk dan hier: https://github.com/jo-anb/simple-plant-extended",
+                                "data": {
+                                        "photo": "Foto",
+                                        "species": "Soort/Variëteit (optioneel)",
+                                        "size": "Plantgrootte (optioneel)",
+                                        "location": "Locatie (optioneel)",
+                                        "distance_to_window": "Afstand tot het raam (optioneel)",
+                                        "pot_diameter": "Potdiameter (optioneel)",
+                                        "soil_type": "Soort potgrond (optioneel)",
+                                        "acquisition_date": "Aanschafdatum (optioneel)",
+                                        "humidity_sensor": "Vochtigheidssensor (optioneel)",
+                                        "temperature_sensor": "Temperatuursensor (optioneel)",
+                                        "light_sensor": "Lichtsensor (optioneel)",
+                                        "notes": "Notities (optioneel)",
+                                        "notify_services": "Meldingsservices",
+                                        "notifications_enabled": "Meldingen inschakelen",
+                                        "dnd_start": "Niet storen start",
+                                        "dnd_end": "Niet storen einde",
+                                        "broadcast_enabled": "Uitzending inschakelen",
+                                        "broadcast_services": "Uitzendingsservices",
+                                        "broadcast_time_1": "Uitzendtijd 1",
+                                        "broadcast_time_2": "Uitzendtijd 2"
+                                }
+                        }
+                },
+                "error": {
+                        "upload_failed_type": "Dit bestandstype wordt niet ondersteund."
+                }
+        },
+        "entity": {
+                "button": {
+                        "mark_watered": {
+                                "name": "Water geven"
+                        },
+                        "mark_fertilized": {
+                                "name": "Bemesten"
+                        },
+                        "mark_misted": {
+                                "name": "Benevelen"
+                        },
+                        "mark_cleaned": {
+                                "name": "Reinigen"
+                        },
+                        "update_data": {
+                                "name": "Gegevens migreren"
+                        }
+                },
+                "binary_sensor": {
+                        "fertilization_todo": {
+                                "name": "Bemesten"
+                        },
+                        "fertilization_problem": {
+                                "name": "Bemesting achterstallig"
+                        },
+                        "misting_todo": {
+                                "name": "Benevelen"
+                        },
+                        "misting_problem": {
+                                "name": "Beneveling achterstallig"
+                        },
+                        "cleaning_todo": {
+                                "name": "Reinigen"
+                        },
+                        "cleaning_problem": {
+                                "name": "Reiniging achterstallig"
+                        },
+                        "todo": {
+                                "name": "Water geven"
+                        },
+                        "problem": {
+                                "name": "Water geven achterstallig"
+                        }
+                },
+                "date": {
+                        "last_watered": {
+                                "name": "Laatst water gegeven"
+                        },
+                        "last_fertilized": {
+                                "name": "Laatst bemest"
+                        },
+                        "last_misted": {
+                                "name": "Laatst beneveld"
+                        },
+                        "last_cleaned": {
+                                "name": "Laatst gereinigd"
+                        }
+                },
+                "image": {
+                        "picture": {
+                                "name": "Afbeelding"
+                        }
+                },
+                "number": {
+                        "days_between_waterings": {
+                                "name": "Dagen tussen water geven"
+                        },
+                        "days_between_fertilizations": {
+                                "name": "Dagen tussen bemesten"
+                        },
+                        "days_between_mistings": {
+                                "name": "Dagen tussen benevelen"
+                        },
+                        "days_between_cleanings": {
+                                "name": "Dagen tussen reinigen"
+                        },
+                        "distance_to_window": {
+                                "name": "Afstand tot het raam"
+                        },
+                        "pot_diameter": {
+                                "name": "Potdiameter"
+                        }
+                },
+                "text": {
+                        "notes": {
+                                "name": "Notities"
+                        },
+                        "species": {
+                                "name": "Soort/Variëteit"
+                        }
+                },
+                "select": {
+                        "health": {
+                                "name": "Gezondheid",
+                                "state": {
+                                        "notset": "Niet ingesteld",
+                                        "poor": "Slecht",
+                                        "fair": "Matig",
+                                        "good": "Goed",
+                                        "verygood": "Zeer goed",
+                                        "excellent": "Uitstekend"
+                                }
+                        },
+                        "feed_method": {
+                                "name": "Bemestingsmethode",
+                                "state": {
+                                        "liquid": "Vloeibaar",
+                                        "pebbles": "Korrels",
+                                        "sticks": "Stokjes"
+                                }
+                        },
+                        "misting_enabled": {
+                                "name": "Benevelen nodig",
+                                "state": {
+                                        "notset": "Niet ingesteld",
+                                        "on": "Ja",
+                                        "off": "Nee"
+                                }
+                        },
+                        "cleaning_enabled": {
+                                "name": "Reiniging nodig",
+                                "state": {
+                                        "notset": "Niet ingesteld",
+                                        "on": "Ja",
+                                        "off": "Nee"
+                                }
+                        },
+                        "illumination": {
+                                "name": "Licht",
+                                "state": {
+                                        "notset": "Niet ingesteld",
+                                        "sunny": "Zonnig",
+                                        "partly_sunny": "Half zonnig",
+                                        "shade": "Schaduw"
+                                }
+                        },
+                        "size": {
+                                "name": "Plantgrootte",
+                                "state": {
+                                        "notset": "Niet ingesteld",
+                                        "seedling": "Zaailing",
+                                        "small": "Klein",
+                                        "medium": "Middel",
+                                        "large": "Groot",
+                                        "xlarge": "Extra groot"
+                                }
+                        },
+                        "location": {
+                                "name": "Locatie",
+                                "state": {
+                                        "notset": "Niet ingesteld",
+                                        "living_room": "Woonkamer",
+                                        "bedroom": "Slaapkamer",
+                                        "kitchen": "Keuken",
+                                        "bathroom": "Badkamer",
+                                        "office": "Kantoor",
+                                        "balcony": "Balkon",
+                                        "patio": "Patio",
+                                        "greenhouse": "Kas",
+                                        "outdoor": "Buiten"
+                                }
+                        },
+                        "soil_type": {
+                                "name": "Soort potgrond",
+                                "state": {
+                                        "notset": "Niet ingesteld",
+                                        "standard_potting_mix": "Standaard potgrond",
+                                        "cactus_succulent": "Cactus/succulent mix",
+                                        "orchid_bark": "Orchideeënschors",
+                                        "peat_based": "Op veenbasis",
+                                        "coco_coir": "Kokosvezel",
+                                        "perlite_mix": "Perlietmix",
+                                        "leca_hydroponics": "LECA/Hydroponie"
+                                }
+                        }
+                },
+                "sensor": {
+                        "next_watering": {
+                                "name": "Volgende waterbeurt"
+                        },
+                        "next_fertilization": {
+                                "name": "Volgende bemesting"
+                        },
+                        "next_misting": {
+                                "name": "Volgende beneveling"
+                        },
+                        "next_cleaning": {
+                                "name": "Volgende reiniging"
+                        },
+                        "current_humidity": {
+                                "name": "Huidige luchtvochtigheid"
+                        },
+                        "current_temperature": {
+                                "name": "Huidige temperatuur"
+                        },
+                        "current_light": {
+                                "name": "Huidig lichtniveau"
+                        },
+                        "plant_age_days": {
+                                "name": "Plantleeftijd"
+                        }
+                }
+        },
+        "component": {
+                "simple_plant_extended": {
+                        "notification": {
+                                "water_today_title": "🌱🫗 {plant} moet vandaag water krijgen",
+                                "water_late_title": "🌱🫗 Water geven aan {plant} is {days} dagen te laat",
+                                "water_message": "Druk hieronder wanneer je {plant} water hebt gegeven.",
+                                "fertilize_today_title": "🌱🫗 {plant} moet vandaag worden bemest",
+                                "fertilize_message": "Druk hieronder wanneer je {plant} hebt bemest.",
+                                "mist_today_title": "🌱🫗 {plant} moet vandaag worden beneveld",
+                                "mist_message": "Druk hieronder wanneer je {plant} hebt beneveld.",
+                                "clean_today_title": "🌱🫗 {plant} moet vandaag worden gereinigd",
+                                "clean_message": "Druk hieronder wanneer je {plant} hebt gereinigd.",
+                                "action_mark_done": "✅ Markeer als gedaan",
+                                "action_skip": "Overslaan"
+                        },
+                        "broadcast": {
+                                "water_overdue": "Achterstallige taak voor {plant}. {plant} had {when} geleden water moeten krijgen.",
+                                "water_today": "{plant} moet vandaag water krijgen.",
+                                "fertilize_overdue": "Achterstallige taak voor {plant}. {plant} had {feed_type} meststof {when} geleden moeten krijgen.",
+                                "fertilize_today": "{plant} moet vandaag {feed_type} meststof krijgen.",
+                                "mist_overdue": "Achterstallige taak voor {plant}. {plant} had {when} geleden beneveld moeten worden.",
+                                "mist_today": "{plant} moet vandaag beneveld worden.",
+                                "clean_overdue": "Achterstallige taak voor {plant}. {plant} had {when} geleden gereinigd moeten worden.",
+                                "clean_today": "{plant} moet vandaag gereinigd worden.",
+                                "no_tasks": "Geen planttaken op dit moment."
+                        }
+                }
+        },
+        "exceptions": {
+                "invalid_future_date": {
+                        "message": "Je kunt geen datum in de toekomst instellen."
+                }
         }
-      }
-    },
-    "error": {
-      "invalid_future_date": "De bewateringsdatum kan niet in de toekomst liggen.",
-      "name_exist": "Er bestaat al een plant met deze naam.",
-      "upload_failed_generic": "Uploaden mislukt, er is iets misgegaan.",
-      "upload_failed_type": "Uploaden mislukt, het bestandstype wordt niet ondersteund.",
-      "unknown": "Er is een onbekende fout opgetreden."
-    },
-    "abort": {
-      "already_configured": "Deze invoer is al geconfigureerd."
-    }
-  },
-  "options": {
-    "step": {
-      "init": {
-        "description": "Wijzig plantdetails of meldingsinstellingen. Hulp nodig bij de configuratie? Zie: https://github.com/jo-anb/simple-plant-extended",
-        "data": {
-          "photo": "Foto",
-          "species": "Soort/variëteit van je plant (optioneel)",
-          "notify_services": "Meldingsdiensten",
-          "notifications_enabled": "Meldingen inschakelen",
-          "dnd_start": "Niet storen starttijd",
-          "dnd_end": "Niet storen eindtijd",
-          "broadcast_enabled": "Broadcast inschakelen",
-          "broadcast_services": "Broadcastdiensten",
-          "broadcast_time_1": "Broadcast tijd 1",
-          "broadcast_time_2": "Broadcast tijd 2"
-        }
-      }
-    },
-    "error": {
-      "upload_failed_type": "Uploaden mislukt, het bestandstype wordt niet ondersteund."
-    }
-  },
-  "entity": {
-    "button": {
-      "mark_watered": {
-        "name": "Markeer als bewaterd"
-      },
-      "mark_fertilized": {
-        "name": "Markeer als gevoeden"
-      },
-      "mark_misted": {
-        "name": "Markeer als beneveld"
-      },
-      "mark_cleaned": {
-        "name": "Markeer als schoongemaakt"
-      },
-      "update_data": {
-        "name": "Migreer gegevens"
-      }
-    },
-    "binary_sensor": {
-      "fertilization_todo": {
-        "name": "voeden nodig"
-      },
-      "fertilization_problem": {
-        "name": "Te laat gevoeden"
-      },
-      "misting_todo": {
-        "name": "benevelen nodig"
-      },
-      "misting_problem": {
-        "name": "Te laat beneveld"
-      },
-      "cleaning_todo": {
-        "name": "Schoonmaken nodig"
-      },
-      "cleaning_problem": {
-        "name": "Te laat schoongemaakt"
-      },
-      "todo": {
-        "name": "Bewatering nodig"
-      },
-      "problem": {
-        "name": "Te laat bewaterd"
-      }
-    },
-    "date": {
-      "last_watered": {
-        "name": "Laatst bewaterd"
-      },
-      "last_fertilized": {
-        "name": "Laatst gevoeden"
-      },
-      "last_misted": {
-        "name": "Laatst beneveld"
-      },
-      "last_cleaned": {
-        "name": "Laatst schoongemaakt"
-      }
-    },
-    "image": {
-      "picture": {
-        "name": "Afbeelding"
-      }
-    },
-    "number": {
-      "days_between_waterings": {
-        "name": "Dagen tussen bewatering"
-      },
-      "days_between_fertilizations": {
-        "name": "Dagen tussen voeding"
-      },
-      "days_between_mistings": {
-        "name": "Dagen tussen beneveling"
-      },
-      "days_between_cleanings": {
-        "name": "Dagen tussen schoonmaak"
-      }
-    },
-    "select": {
-      "health": {
-        "name": "Huidige gezondheid",
-        "state": {
-          "notset": "Niet ingesteld",
-          "poor": "Slecht",
-          "fair": "Matig",
-          "good": "Goed",
-          "verygood": "Zeer goed",
-          "excellent": "Uitstekend"
-        }
-      },
-      "feed_method": {
-        "name": "voedingsmethode",
-        "state": {
-          "liquid": "Vloeibaar",
-          "pebbles": "Korrels",
-          "sticks": "Stokjes"
-        }
-      },
-      "misting_enabled": {
-        "name": "Moet beneveld worden",
-        "state": {
-          "notset": "Niet ingesteld",
-          "on": "Ja",
-          "off": "Nee"
-        }
-      },
-      "cleaning_enabled": {
-        "name": "Moet schoongemaakt worden",
-        "state": {
-          "notset": "Niet ingesteld",
-          "on": "Ja",
-          "off": "Nee"
-        }
-      },
-      "illumination": {
-        "name": "Lichtbehoefte",
-        "state": {
-          "notset": "Niet ingesteld",
-          "sunny": "Zonnig",
-          "partly_sunny": "Gedeeltelijk zonnig",
-          "shade": "Schaduw"
-        }
-      }
-    },
-    "sensor": {
-      "next_watering": {
-        "name": "Volgende bewatering"
-      },
-      "next_fertilization": {
-        "name": "Volgende voeding"
-      },
-      "next_misting": {
-        "name": "Volgende beneveling"
-      },
-      "next_cleaning": {
-        "name": "Volgende schoonmaak"
-      }
-    }
-  },
-  "component": {
-    "simple_plant_extended": {
-      "notification": {
-        "water_today_title": "🌱🫗 {plant} moet vandaag water krijgen",
-        "water_late_title": "🌱🫗 {plant} water geven is {days} dagen over tijd",
-        "water_message": "Tik hieronder als je {plant} water gaf.",
-        "fertilize_today_title": "🌱🫗 {plant} moet vandaag gevoed worden",
-        "fertilize_message": "Tik hieronder als je {plant} gevoed hebt.",
-        "mist_today_title": "🌱🫗 {plant} moet vandaag beneveld worden",
-        "mist_message": "Tik hieronder als je {plant} benevelde.",
-        "clean_today_title": "🌱🫗 {plant} moet vandaag gereinigd worden",
-        "clean_message": "Tik hieronder als je {plant} gereinigd hebt.",
-        "action_mark_done": "✅ Markeer als gedaan",
-        "action_skip": "Overslaan"
-      },
-      "broadcast": {
-        "water_overdue": "Overdue taak voor {plant}. {plant} moest {when} geleden water krijgen.",
-        "water_today": "{plant} moet vandaag water krijgen.",
-        "fertilize_overdue": "Overdue taak voor {plant}. {plant} had {feed_type} plantenvoeding nodig {when} geleden.",
-        "fertilize_today": "{plant} heeft vandaag {feed_type} plantenvoeding nodig.",
-        "mist_overdue": "Overdue taak voor {plant}. {plant} moest {when} geleden beneveld worden.",
-        "mist_today": "{plant} moet vandaag beneveld worden.",
-        "clean_overdue": "Overdue taak voor {plant}. {plant} moest {when} geleden gereinigd worden.",
-        "clean_today": "{plant} moet vandaag gereinigd worden.",
-        "no_tasks": "Geen planttaken op dit moment."
-      }
-    }
-  },
-  "exceptions": {
-    "invalid_future_date": {
-      "message": "De bewateringsdatum kan niet in de toekomst liggen."
-    }
-  }
 }

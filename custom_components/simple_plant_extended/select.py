@@ -15,7 +15,10 @@ from .const import (
     FEED_OPTIONS,
     HEALTH_OPTIONS,
     ILLUMINATION_OPTIONS,
+    LOCATION_OPTIONS,
     LOGGER,
+    SIZE_OPTIONS,
+    SOIL_TYPE_OPTIONS,
 )
 
 if TYPE_CHECKING:
@@ -56,6 +59,24 @@ ENTITY_DESCRIPTIONS = (
         translation_key="illumination",
         icon="mdi:theme-light-dark",
         options=ILLUMINATION_OPTIONS,
+    ),
+    SelectEntityDescription(
+        key="size",
+        translation_key="size",
+        icon="mdi:flower",
+        options=SIZE_OPTIONS,
+    ),
+    SelectEntityDescription(
+        key="location",
+        translation_key="location",
+        icon="mdi:map-marker",
+        options=LOCATION_OPTIONS,
+    ),
+    SelectEntityDescription(
+        key="soil_type",
+        translation_key="soil_type",
+        icon="mdi:shovel",
+        options=SOIL_TYPE_OPTIONS,
     ),
 )
 
@@ -121,6 +142,15 @@ class SimplePlantExtendedSelect(SelectEntity):
     def device(self) -> str | None:
         """Return the device name."""
         return self.coordinator.device
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        """Return device attributes merged with state attributes."""
+        attrs: dict = {}
+        if self._attr_extra_state_attributes:
+            attrs.update(self._attr_extra_state_attributes)
+        attrs.update(self.coordinator.device_attributes)
+        return attrs
 
     async def async_added_to_hass(self) -> None:
         """Run when entity is added to hass."""

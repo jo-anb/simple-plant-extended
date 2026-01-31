@@ -10,7 +10,7 @@ from homeassistant.components.number import (
     NumberEntityDescription,
     NumberMode,
 )
-from homeassistant.const import UnitOfTime
+from homeassistant.const import UnitOfLength, UnitOfTime
 
 from .const import DOMAIN, LOGGER
 
@@ -59,6 +59,28 @@ ENTITY_DESCRIPTIONS = (
         native_step=0,
         native_unit_of_measurement=UnitOfTime.DAYS,
     ),
+    NumberEntityDescription(
+        key="distance_to_window",
+        translation_key="distance_to_window",
+        device_class=NumberDeviceClass.DISTANCE,
+        mode=NumberMode.BOX,
+        icon="mdi:ruler",
+        native_min_value=0,
+        native_max_value=1000,
+        native_step=10,
+        native_unit_of_measurement=UnitOfLength.CENTIMETERS,
+    ),
+    NumberEntityDescription(
+        key="pot_diameter",
+        translation_key="pot_diameter",
+        device_class=NumberDeviceClass.DISTANCE,
+        mode=NumberMode.BOX,
+        icon="mdi:circle-double",
+        native_min_value=5,
+        native_max_value=200,
+        native_step=1,
+        native_unit_of_measurement=UnitOfLength.CENTIMETERS,
+    ),
 )
 
 
@@ -103,6 +125,13 @@ class SimplePlantExtendedNumber(NumberEntity):
         self.entity_id = f"number.{DOMAIN}_{description.key}_{device}"
         self._attr_unique_id = f"{DOMAIN}_{description.key}_{device}"
 
+        if description.native_min_value is not None:
+            self._attr_native_min_value = description.native_min_value
+        if description.native_max_value is not None:
+            self._attr_native_max_value = description.native_max_value
+        if description.native_step is not None:
+            self._attr_native_step = description.native_step
+
         # set value
         self._fallback_value = entry.data.get(description.key)
 
@@ -113,6 +142,11 @@ class SimplePlantExtendedNumber(NumberEntity):
     def device(self) -> str | None:
         """Return the device name."""
         return self.coordinator.device
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        """Return device attributes."""
+        return dict(self.coordinator.device_attributes)
 
     async def async_added_to_hass(self) -> None:
         """Run when entity is added to hass."""

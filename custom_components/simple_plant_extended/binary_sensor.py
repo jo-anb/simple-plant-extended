@@ -73,6 +73,11 @@ class SimplePlantExtendedBinarySensor(BinarySensorEntity):
         """Return the device name."""
         return self.coordinator.device
 
+    @property
+    def extra_state_attributes(self) -> dict:
+        """Return device attributes."""
+        return dict(self.coordinator.device_attributes)
+
     async def get_dates(self) -> dict[str, datetime] | None:
         """Get dates from relevants device entites states."""
         return await self.coordinator.get_dates()

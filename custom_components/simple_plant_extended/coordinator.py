@@ -48,6 +48,14 @@ class SimplePlantExtendedCoordinator(DataUpdateCoordinator[dict]):
         await self.store.async_load()
         return await self.store.async_get_data(self.device)
 
+    @property
+    def device_attributes(self) -> dict[str, Any]:
+        """Return config entry data as device attributes."""
+        data = dict(self.config_entry.data)
+        if self.data and "notes_log" in self.data:
+            data["notes_log"] = self.data["notes_log"]
+        return {key: value for key, value in data.items() if value not in (None, "")}
+
     async def remove_device_from_storage(self) -> None:
         """Remove entry in storage."""
         await self.store.async_remove_device(self.device)

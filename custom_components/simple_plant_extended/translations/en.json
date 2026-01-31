@@ -20,7 +20,17 @@
                     "misting_enabled": "Plant needs misting",
                     "cleaning_enabled": "Plant needs cleaning",
                     "enabled": "Enabled",
-                    "species": "Species/Variety of your plant (Optional)"
+                    "species": "Species/Variety of your plant (Optional)",
+                    "size": "Plant size (Optional)",
+                    "location": "Location (Optional)",
+                    "distance_to_window": "Distance to window (Optional)",
+                    "pot_diameter": "Pot diameter (Optional)",
+                    "soil_type": "Soil type (Optional)",
+                    "acquisition_date": "Date acquired (Optional)",
+                    "humidity_sensor": "Humidity sensor (Optional)",
+                    "temperature_sensor": "Temperature sensor (Optional)",
+                    "light_sensor": "Light sensor (Optional)",
+                    "notes": "Notes (Optional)"
                 }
             }
         },
@@ -42,6 +52,16 @@
                 "data": {
                     "photo": "Photo",
                         "species": "Species/Variety of your plant (Optional)",
+                    "size": "Plant size (Optional)",
+                    "location": "Location (Optional)",
+                    "distance_to_window": "Distance to window (Optional)",
+                    "pot_diameter": "Pot diameter (Optional)",
+                    "soil_type": "Soil type (Optional)",
+                    "acquisition_date": "Date acquired (Optional)",
+                    "humidity_sensor": "Humidity sensor (Optional)",
+                    "temperature_sensor": "Temperature sensor (Optional)",
+                    "light_sensor": "Light sensor (Optional)",
+                    "notes": "Notes (Optional)",
                         "notify_services": "Notification services",
                         "notifications_enabled": "Enable notifications",
                         "dnd_start": "Do not disturb start",
@@ -132,6 +152,20 @@
             },
             "days_between_cleanings": {
                 "name": "Days between cleanings"
+            },
+            "distance_to_window": {
+                "name": "Distance to window"
+            },
+            "pot_diameter": {
+                "name": "Pot diameter"
+            }
+        },
+        "text": {
+            "notes": {
+                "name": "Notes"
+            },
+            "species": {
+                "name": "Species"
             }
         },
         "select": {
@@ -178,6 +212,45 @@
                     "partly_sunny": "Partly Sunny",
                     "shade": "Shade"
                 }
+            },
+            "size": {
+                "name": "Plant size",
+                "state": {
+                    "notset": "Not Set",
+                    "seedling": "Seedling",
+                    "small": "Small",
+                    "medium": "Medium",
+                    "large": "Large",
+                    "xlarge": "Extra Large"
+                }
+            },
+            "location": {
+                "name": "Location",
+                "state": {
+                    "notset": "Not Set",
+                    "living_room": "Living Room",
+                    "bedroom": "Bedroom",
+                    "kitchen": "Kitchen",
+                    "bathroom": "Bathroom",
+                    "office": "Office",
+                    "balcony": "Balcony",
+                    "patio": "Patio",
+                    "greenhouse": "Greenhouse",
+                    "outdoor": "Outdoor"
+                }
+            },
+            "soil_type": {
+                "name": "Soil type",
+                "state": {
+                    "notset": "Not Set",
+                    "standard_potting_mix": "Standard Potting Mix",
+                    "cactus_succulent": "Cactus/Succulent Mix",
+                    "orchid_bark": "Orchid Bark",
+                    "peat_based": "Peat-Based",
+                    "coco_coir": "Coco Coir",
+                    "perlite_mix": "Perlite Mix",
+                    "leca_hydroponics": "LECA/Hydroponics"
+                }
             }
         },
         "sensor": {
@@ -192,6 +265,18 @@
             },
             "next_cleaning": {
                 "name": "Next cleaning"
+            },
+            "current_humidity": {
+                "name": "Current humidity"
+            },
+            "current_temperature": {
+                "name": "Current temperature"
+            },
+            "current_light": {
+                "name": "Current light level"
+            },
+            "plant_age_days": {
+                "name": "Plant age"
             }
         }
     },

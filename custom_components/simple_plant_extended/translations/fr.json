@@ -6,10 +6,31 @@
                 "data": {
                     "name": "Nom",
                     "last_watered": "Dernier arrosage",
+                    "last_fertilized": "Dernière fertilisation",
+                    "last_misted": "Dernière brumisation (Optionnel)",
+                    "last_cleaned": "Dernier nettoyage (Optionnel)",
                     "days_between_waterings": "Nombre de jours entre chaque arrosage",
+                    "days_between_fertilizations": "Jours entre les fertilisations",
+                    "days_between_mistings": "Jours entre brumisations (Optionnel)",
+                    "days_between_cleanings": "Jours entre nettoyages (Optionnel)",
+                    "feed_method": "Méthode de fertilisation",
+                    "illumination": "Besoins en lumière",
                     "photo": "Photo",
                     "health": "Santé actuelle (Optionnel)",
-                    "species": "Espèce/Variété (Optionnel)"
+                    "misting_enabled": "La plante a besoin d'être brumisée",
+                    "cleaning_enabled": "La plante a besoin d'être nettoyée",
+                    "enabled": "Activé",
+                    "species": "Espèce/Variété de votre plante (Optionnel)",
+                    "size": "Taille de la plante (Optionnel)",
+                    "location": "Emplacement (Optionnel)",
+                    "distance_to_window": "Distance à la fenêtre (Optionnel)",
+                    "pot_diameter": "Diamètre du pot (Optionnel)",
+                    "soil_type": "Type de sol (Optionnel)",
+                    "acquisition_date": "Date d'acquisition (Optionnel)",
+                    "humidity_sensor": "Capteur d'humidité (Optionnel)",
+                    "temperature_sensor": "Capteur de température (Optionnel)",
+                    "light_sensor": "Capteur de lumière (Optionnel)",
+                    "notes": "Notes (Optionnel)"
                 }
             }
         },
@@ -27,13 +48,23 @@
     "options": {
         "step": {
             "init": {
-                    "description": "Modifiez les détails de la plante ou les paramètres de notification. Si vous avez besoin d'aide, allez jeter un oeil ici : https://github.com/jo-anb/simple-plant-extended",
+                "description": "Modifiez les détails de la plante ou les paramètres de notification. Si vous avez besoin d'aide, allez jeter un oeil ici : https://github.com/jo-anb/simple-plant-extended",
                 "data": {
                     "photo": "Photo",
-                        "species": "Espèce/Variété",
-                        "notify_services": "Services de notification",
-                        "notifications_enabled": "Activer les notifications",
-                        "dnd_start": "Début ne pas déranger",
+                    "species": "Espèce/Variété (Optionnel)",
+                    "size": "Taille de la plante (Optionnel)",
+                    "location": "Emplacement (Optionnel)",
+                    "distance_to_window": "Distance à la fenêtre (Optionnel)",
+                    "pot_diameter": "Diamètre du pot (Optionnel)",
+                    "soil_type": "Type de sol (Optionnel)",
+                    "acquisition_date": "Date d'acquisition (Optionnel)",
+                    "humidity_sensor": "Capteur d'humidité (Optionnel)",
+                    "temperature_sensor": "Capteur de température (Optionnel)",
+                    "light_sensor": "Capteur de lumière (Optionnel)",
+                    "notes": "Notes (Optionnel)",
+                    "notify_services": "Services de notification",
+                    "notifications_enabled": "Activer les notifications",
+                    "dnd_start": "Début ne pas déranger",
                     "dnd_end": "Fin ne pas déranger",
                     "broadcast_enabled": "Activer la diffusion",
                     "broadcast_services": "Services de diffusion",
@@ -43,26 +74,65 @@
             }
         },
         "error": {
-            "upload_failed_type": "File upload failed, the file type is not a supported image type."
+            "upload_failed_type": "Le type de fichier n'est pas une image supportée."
         }
     },
     "entity": {
         "button": {
             "mark_watered": {
                 "name": "Arroser"
+            },
+            "mark_fertilized": {
+                "name": "Fertiliser"
+            },
+            "mark_misted": {
+                "name": "Brumiser"
+            },
+            "mark_cleaned": {
+                "name": "Nettoyer"
+            },
+            "update_data": {
+                "name": "Migrer les données"
             }
         },
         "binary_sensor": {
+            "fertilization_todo": {
+                "name": "À fertiliser"
+            },
+            "fertilization_problem": {
+                "name": "Fertilisation en retard"
+            },
+            "misting_todo": {
+                "name": "À brumiser"
+            },
+            "misting_problem": {
+                "name": "Brumisation en retard"
+            },
+            "cleaning_todo": {
+                "name": "À nettoyer"
+            },
+            "cleaning_problem": {
+                "name": "Nettoyage en retard"
+            },
             "todo": {
                 "name": "À arroser"
             },
             "problem": {
-                "name": "Retard d'arrosage"
+                "name": "Arrosage en retard"
             }
         },
         "date": {
             "last_watered": {
                 "name": "Dernier arrosage"
+            },
+            "last_fertilized": {
+                "name": "Dernière fertilisation"
+            },
+            "last_misted": {
+                "name": "Dernière brumisation"
+            },
+            "last_cleaned": {
+                "name": "Dernier nettoyage"
             }
         },
         "image": {
@@ -72,7 +142,30 @@
         },
         "number": {
             "days_between_waterings": {
-                "name": "Jours entre chaque arrosage"
+                "name": "Jours entre les arrosages"
+            },
+            "days_between_fertilizations": {
+                "name": "Jours entre les fertilisations"
+            },
+            "days_between_mistings": {
+                "name": "Jours entre les brumisations"
+            },
+            "days_between_cleanings": {
+                "name": "Jours entre les nettoyages"
+            },
+            "distance_to_window": {
+                "name": "Distance à la fenêtre"
+            },
+            "pot_diameter": {
+                "name": "Diamètre du pot"
+            }
+        },
+        "text": {
+            "notes": {
+                "name": "Notes"
+            },
+            "species": {
+                "name": "Espèce/Variété"
             }
         },
         "select": {
@@ -80,17 +173,110 @@
                 "name": "Santé",
                 "state": {
                     "notset": "Non défini",
-                    "poor": "Mal-en-point",
-                    "fair": "Fébrile",
-                    "good": "Stable",
-                    "verygood": "En forme",
-                    "excellent": "Rayonnante"
+                    "poor": "Mauvais",
+                    "fair": "Moyen",
+                    "good": "Bon",
+                    "verygood": "Très bon",
+                    "excellent": "Excellent"
+                }
+            },
+            "feed_method": {
+                "name": "Méthode de fertilisation",
+                "state": {
+                    "liquid": "Liquide",
+                    "pebbles": "Granulés",
+                    "sticks": "Bâtonnets"
+                }
+            },
+            "misting_enabled": {
+                "name": "Besoin de brumisation",
+                "state": {
+                    "notset": "Non défini",
+                    "on": "Oui",
+                    "off": "Non"
+                }
+            },
+            "cleaning_enabled": {
+                "name": "Besoin de nettoyage",
+                "state": {
+                    "notset": "Non défini",
+                    "on": "Oui",
+                    "off": "Non"
+                }
+            },
+            "illumination": {
+                "name": "Lumière",
+                "state": {
+                    "notset": "Non défini",
+                    "sunny": "Ensoleillé",
+                    "partly_sunny": "Partiellement ensoleillé",
+                    "shade": "Ombre"
+                }
+            },
+            "size": {
+                "name": "Taille de la plante",
+                "state": {
+                    "notset": "Non défini",
+                    "seedling": "Jeune plant",
+                    "small": "Petite",
+                    "medium": "Moyenne",
+                    "large": "Grande",
+                    "xlarge": "Très grande"
+                }
+            },
+            "location": {
+                "name": "Emplacement",
+                "state": {
+                    "notset": "Non défini",
+                    "living_room": "Salon",
+                    "bedroom": "Chambre",
+                    "kitchen": "Cuisine",
+                    "bathroom": "Salle de bain",
+                    "office": "Bureau",
+                    "balcony": "Balcon",
+                    "patio": "Terrasse",
+                    "greenhouse": "Serre",
+                    "outdoor": "Extérieur"
+                }
+            },
+            "soil_type": {
+                "name": "Type de sol",
+                "state": {
+                    "notset": "Non défini",
+                    "standard_potting_mix": "Terreau classique",
+                    "cactus_succulent": "Mélange cactus/succulentes",
+                    "orchid_bark": "Écorce d'orchidée",
+                    "peat_based": "À base de tourbe",
+                    "coco_coir": "Fibre de coco",
+                    "perlite_mix": "Mélange avec perlite",
+                    "leca_hydroponics": "LECA/Hydroponie"
                 }
             }
         },
         "sensor": {
             "next_watering": {
                 "name": "Prochain arrosage"
+            },
+            "next_fertilization": {
+                "name": "Prochaine fertilisation"
+            },
+            "next_misting": {
+                "name": "Prochaine brumisation"
+            },
+            "next_cleaning": {
+                "name": "Prochain nettoyage"
+            },
+            "current_humidity": {
+                "name": "Humidité actuelle"
+            },
+            "current_temperature": {
+                "name": "Température actuelle"
+            },
+            "current_light": {
+                "name": "Niveau de lumière actuel"
+            },
+            "plant_age_days": {
+                "name": "Âge de la plante"
             }
         }
     },
@@ -102,8 +288,8 @@
                 "water_message": "Appuyez ci-dessous lorsque vous avez arrosé {plant}.",
                 "fertilize_today_title": "🌱🫗 {plant} doit être fertilisée aujourd'hui",
                 "fertilize_message": "Appuyez ci-dessous lorsque vous avez fertilisé {plant}.",
-                "mist_today_title": "🌱🫗 {plant} doit être vaporisée aujourd'hui",
-                "mist_message": "Appuyez ci-dessous lorsque vous avez vaporisé {plant}.",
+                "mist_today_title": "🌱🫗 {plant} doit être brumisée aujourd'hui",
+                "mist_message": "Appuyez ci-dessous lorsque vous avez brumisé {plant}.",
                 "clean_today_title": "🌱🫗 {plant} doit être nettoyée aujourd'hui",
                 "clean_message": "Appuyez ci-dessous lorsque vous avez nettoyé {plant}.",
                 "action_mark_done": "✅ Marquer comme fait",
@@ -114,8 +300,8 @@
                 "water_today": "{plant} doit être arrosée aujourd'hui.",
                 "fertilize_overdue": "Tâche en retard pour {plant}. {plant} devait recevoir de l'engrais {feed_type} il y a {when}.",
                 "fertilize_today": "{plant} doit recevoir de l'engrais {feed_type} aujourd'hui.",
-                "mist_overdue": "Tâche en retard pour {plant}. {plant} devait être vaporisée il y a {when}.",
-                "mist_today": "{plant} doit être vaporisée aujourd'hui.",
+                "mist_overdue": "Tâche en retard pour {plant}. {plant} devait être brumisée il y a {when}.",
+                "mist_today": "{plant} doit être brumisée aujourd'hui.",
                 "clean_overdue": "Tâche en retard pour {plant}. {plant} devait être nettoyée il y a {when}.",
                 "clean_today": "{plant} doit être nettoyée aujourd'hui.",
                 "no_tasks": "Aucune tâche de plante pour le moment."

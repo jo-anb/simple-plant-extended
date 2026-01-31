@@ -7,10 +7,14 @@ https://github.com/jo-anb/simple-plant-extended
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
+import voluptuous as vol
+from homeassistant.components.logbook import async_log_entry
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import async_get_hass
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.config_validation import config_entry_only_config_schema
 from homeassistant.helpers.device_registry import (
     EVENT_DEVICE_REGISTRY_UPDATED,
@@ -33,15 +37,77 @@ if TYPE_CHECKING:
 
 CONFIG_SCHEMA = config_entry_only_config_schema(DOMAIN)
 
+SERVICE_ADD_NOTE = "add_note"
+NOTE_LOG_KEY = "notes_log"
+MAX_NOTES_LOG = 100
+
 
 async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
     """Set up the Simple Plant component."""
     hass.data.setdefault(DOMAIN, {})
 
+    async def async_add_note_service(call) -> None:  # type: ignore[no-untyped-def]
+        entity_id = call.data.get("entity_id")
+        note = call.data.get("note")
+        ent_reg = async_get(hass)
+        entity_entry = ent_reg.async_get(entity_id)
+        if entity_entry is None:
+            LOGGER.warning("Entity %s not found for add_note", entity_id)
+            return
+        entry_id = entity_entry.config_entry_id
+        coordinator: SimplePlantExtendedCoordinator | None = hass.data[DOMAIN].get(
+            entry_id
+        )
+        if coordinator is None:
+            LOGGER.warning("Coordinator not found for entry %s", entry_id)
+            return
+
+        timestamp = datetime.now(timezone.utc).isoformat()
+        current = await coordinator.store.async_get_data(coordinator.device)
+        notes_log = list(current.get(NOTE_LOG_KEY, []))
+        notes_log.append({"timestamp": timestamp, "note": note})
+        if len(notes_log) > MAX_NOTES_LOG:
+            notes_log = notes_log[-MAX_NOTES_LOG:]
+
+        await coordinator.store.async_save_data(
+            coordinator.device,
+            {NOTE_LOG_KEY: notes_log},
+        )
+        await coordinator.async_refresh()
+
+        hass.bus.async_fire(
+            f"{DOMAIN}_note_added",
+            {
+                "device": coordinator.device,
+                "note": note,
+                "timestamp": timestamp,
+            },
+        )
+
+        async_log_entry(
+            hass,
+            DOMAIN,
+            coordinator.config_entry.title,
+            f"Note added: {note}",
+            entity_id=entity_id,
+        )
+
     # Start runtime notifications/broadcast manager
     manager = NotificationManager(hass)
     hass.data[DOMAIN]["notification_manager"] = manager
     await manager.async_start()
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_ADD_NOTE,
+        async_add_note_service,
+        schema=vol.Schema(
+            {
+                vol.Required("entity_id"): cv.entity_id,
+                vol.Required("note"): cv.string,
+            }
+        ),
+    )
 
     return True
 
@@ -50,7 +116,26 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up this integration using UI."""
     LOGGER.debug("Setting up entry %s", entry.title)
+    if "fertilization_method" in entry.data and "feed_method" not in entry.data:
+        data = dict(entry.data)
+        data["feed_method"] = data.pop("fertilization_method")
+        hass.config_entries.async_update_entry(entry, data=data)
     coordinator = SimplePlantExtendedCoordinator(hass, entry)
+    await coordinator.store.async_rename_key(
+        coordinator.device,
+        "fertilization_method",
+        "feed_method",
+    )
+    if "feed_method" in entry.data:
+        await hass.services.async_call(
+            "select",
+            "select_option",
+            {
+                "entity_id": f"select.{DOMAIN}_feed_method_{coordinator.device}",
+                "option": entry.data["feed_method"],
+            },
+            blocking=True,
+        )
 
     if entry.state == ConfigEntryState.SETUP_IN_PROGRESS:
         await coordinator.async_config_entry_first_refresh()

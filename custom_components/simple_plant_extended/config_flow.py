@@ -42,7 +42,10 @@ from .const import (
     HEALTH_OPTIONS,
     ILLUMINATION_OPTIONS,
     IMAGES_MIME_TYPES,
+    LOCATION_OPTIONS,
     LOGGER,
+    SIZE_OPTIONS,
+    SOIL_TYPE_OPTIONS,
     STORAGE_DIR,
 )
 
@@ -116,7 +119,7 @@ def user_form() -> vol.Schema:
                     unit_of_measurement="days",
                 ),
             ),
-            vol.Required("fertilization_method"): selector.SelectSelector(
+            vol.Required("feed_method"): selector.SelectSelector(
                 selector.SelectSelectorConfig(
                     {
                         "options": FEED_OPTIONS,
@@ -197,6 +200,75 @@ def user_form() -> vol.Schema:
             vol.Optional("species", default="notset"): selector.TextSelector(
                 selector.TextSelectorConfig(multiline=False, multiple=False)
             ),
+            vol.Optional("size", default="notset"): selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    {
+                        "options": SIZE_OPTIONS,
+                        "custom_value": False,
+                        "sort": False,
+                    }
+                )
+            ),
+            vol.Optional("location", default="notset"): selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    {
+                        "options": LOCATION_OPTIONS,
+                        "custom_value": True,
+                        "sort": False,
+                    }
+                )
+            ),
+            vol.Optional("distance_to_window"): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0,
+                    max=1000,
+                    step=10,
+                    mode=selector.NumberSelectorMode.BOX,
+                    unit_of_measurement="cm",
+                )
+            ),
+            vol.Optional("pot_diameter"): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=5,
+                    max=200,
+                    step=1,
+                    mode=selector.NumberSelectorMode.BOX,
+                    unit_of_measurement="cm",
+                )
+            ),
+            vol.Optional("soil_type", default="notset"): selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    {
+                        "options": SOIL_TYPE_OPTIONS,
+                        "custom_value": True,
+                        "sort": False,
+                    }
+                )
+            ),
+            vol.Optional("acquisition_date"): selector.DateSelector(
+                selector.DateSelectorConfig(),
+            ),
+            vol.Optional("humidity_sensor"): selector.EntitySelector(
+                selector.EntitySelectorConfig(
+                    domain="sensor",
+                    device_class="humidity",
+                )
+            ),
+            vol.Optional("temperature_sensor"): selector.EntitySelector(
+                selector.EntitySelectorConfig(
+                    domain="sensor",
+                    device_class="temperature",
+                )
+            ),
+            vol.Optional("light_sensor"): selector.EntitySelector(
+                selector.EntitySelectorConfig(
+                    domain="sensor",
+                    device_class="illuminance",
+                )
+            ),
+            vol.Optional("notes"): selector.TextSelector(
+                selector.TextSelectorConfig(multiline=True, multiple=False)
+            ),
             vol.Required("photo"): selector.FileSelector(
                 selector.FileSelectorConfig(accept="image/*")
             ),
@@ -210,6 +282,75 @@ def option_form(suggested_species: str | None = None) -> vol.Schema:
     return vol.Schema(
         {
             vol.Optional("species", default="", description=suggested_species): str,
+            vol.Optional("size"): selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    {
+                        "options": SIZE_OPTIONS,
+                        "custom_value": False,
+                        "sort": False,
+                    }
+                )
+            ),
+            vol.Optional("location"): selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    {
+                        "options": LOCATION_OPTIONS,
+                        "custom_value": True,
+                        "sort": False,
+                    }
+                )
+            ),
+            vol.Optional("distance_to_window"): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0,
+                    max=1000,
+                    step=10,
+                    mode=selector.NumberSelectorMode.BOX,
+                    unit_of_measurement="cm",
+                )
+            ),
+            vol.Optional("pot_diameter"): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=5,
+                    max=200,
+                    step=1,
+                    mode=selector.NumberSelectorMode.BOX,
+                    unit_of_measurement="cm",
+                )
+            ),
+            vol.Optional("soil_type"): selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    {
+                        "options": SOIL_TYPE_OPTIONS,
+                        "custom_value": True,
+                        "sort": False,
+                    }
+                )
+            ),
+            vol.Optional("acquisition_date"): selector.DateSelector(
+                selector.DateSelectorConfig(),
+            ),
+            vol.Optional("humidity_sensor"): selector.EntitySelector(
+                selector.EntitySelectorConfig(
+                    domain="sensor",
+                    device_class="humidity",
+                )
+            ),
+            vol.Optional("temperature_sensor"): selector.EntitySelector(
+                selector.EntitySelectorConfig(
+                    domain="sensor",
+                    device_class="temperature",
+                )
+            ),
+            vol.Optional("light_sensor"): selector.EntitySelector(
+                selector.EntitySelectorConfig(
+                    domain="sensor",
+                    device_class="illuminance",
+                )
+            ),
+            vol.Optional("notes"): selector.TextSelector(
+                selector.TextSelectorConfig(multiline=True, multiple=False)
+            ),
             vol.Optional("photo"): selector.FileSelector(
                 selector.FileSelectorConfig(accept="image/*")
             ),
@@ -398,6 +539,21 @@ class SimplePlantExtendedOptionFlowHandler(OptionsFlow):
         if user_input.get("species"):
             self.user_inputs["species"] = user_input["species"]
 
+        for key in (
+            "size",
+            "location",
+            "distance_to_window",
+            "pot_diameter",
+            "soil_type",
+            "acquisition_date",
+            "humidity_sensor",
+            "temperature_sensor",
+            "light_sensor",
+            "notes",
+        ):
+            if key in user_input:
+                self.user_inputs[key] = user_input[key]
+
         if user_input.get("photo"):
             try:
                 file_id = user_input["photo"]
@@ -452,7 +608,20 @@ class SimplePlantExtendedOptionFlowHandler(OptionsFlow):
         data = dict(self.config_entry.data)
         options = dict(self.config_entry.options)
 
-        for key in ("species", "photo"):
+        for key in (
+            "species",
+            "photo",
+            "size",
+            "location",
+            "distance_to_window",
+            "pot_diameter",
+            "soil_type",
+            "acquisition_date",
+            "humidity_sensor",
+            "temperature_sensor",
+            "light_sensor",
+            "notes",
+        ):
             if key in self.user_inputs:
                 data[key] = self.user_inputs[key]
 

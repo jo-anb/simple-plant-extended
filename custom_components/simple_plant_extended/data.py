@@ -92,3 +92,17 @@ class SimplePlantExtendedStore:
             self._data[new_id] = new_data
             del self._data[device]
             await self.store.async_save(self._data)
+
+    async def async_rename_key(self, device: str, old_key: str, new_key: str) -> None:
+        """Rename a key in device data if present."""
+        if self._data is None:
+            await self.async_load()
+        if self._data is None:  # for linting
+            LOGGER.error("Failed to load data from storage")
+            return
+        device_data: dict[str, Any] = self._data.get(device, {})
+        if old_key not in device_data or new_key in device_data:
+            return
+        device_data[new_key] = device_data.pop(old_key)
+        self._data[device] = device_data
+        await self.store.async_save(self._data)

@@ -59,6 +59,39 @@ ILLUMINATION_OPTIONS = [
     "shade",
 ]
 
+SIZE_OPTIONS = [
+    "notset",
+    "seedling",
+    "small",
+    "medium",
+    "large",
+    "xlarge",
+]
+
+LOCATION_OPTIONS = [
+    "notset",
+    "living_room",
+    "bedroom",
+    "kitchen",
+    "bathroom",
+    "office",
+    "balcony",
+    "patio",
+    "greenhouse",
+    "outdoor",
+]
+
+SOIL_TYPE_OPTIONS = [
+    "notset",
+    "standard_potting_mix",
+    "cactus_succulent",
+    "orchid_bark",
+    "peat_based",
+    "coco_coir",
+    "perlite_mix",
+    "leca_hydroponics",
+]
+
 IMAGES_MIME_TYPES = {
     ".png": "image/png",
     ".jpg": "image/jpeg",
@@ -79,4 +112,5 @@ PLATFORMS: list[Platform] = [
     Platform.NUMBER,
     Platform.SELECT,
     Platform.SENSOR,
+    Platform.TEXT,
 ]
