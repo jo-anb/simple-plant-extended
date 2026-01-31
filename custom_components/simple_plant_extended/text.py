@@ -84,10 +84,6 @@ class SimplePlantExtendedText(TextEntity):
         """Return the device name."""
         return self.coordinator.device
 
-    @property
-    def extra_state_attributes(self) -> dict:
-        """Return device attributes."""
-        return dict(self.coordinator.device_attributes)
 
     async def async_added_to_hass(self) -> None:
         """Run when entity is added to hass."""

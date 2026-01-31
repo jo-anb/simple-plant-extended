@@ -143,14 +143,6 @@ class SimplePlantExtendedSelect(SelectEntity):
         """Return the device name."""
         return self.coordinator.device
 
-    @property
-    def extra_state_attributes(self) -> dict:
-        """Return device attributes merged with state attributes."""
-        attrs: dict = {}
-        if self._attr_extra_state_attributes:
-            attrs.update(self._attr_extra_state_attributes)
-        attrs.update(self.coordinator.device_attributes)
-        return attrs
 
     async def async_added_to_hass(self) -> None:
         """Run when entity is added to hass."""

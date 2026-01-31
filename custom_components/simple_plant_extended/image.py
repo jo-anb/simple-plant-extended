@@ -79,10 +79,6 @@ class SimplePlantExtendedImage(ImageEntity):
         """Return the device name."""
         return self.coordinator.device
 
-    @property
-    def extra_state_attributes(self) -> dict:
-        """Return device attributes."""
-        return dict(self.coordinator.device_attributes)
 
     def _get_content_type(self, path: Path) -> str:
         """Get the content type of the image based on its extension."""

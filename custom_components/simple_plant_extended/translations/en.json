@@ -277,6 +277,13 @@
             },
             "plant_age_days": {
                 "name": "Plant age"
+            },
+            "status": {
+                "name": "Status",
+                "state": {
+                    "ok": "OK",
+                    "open_tasks": "Open tasks"
+                }
             }
         }
     },

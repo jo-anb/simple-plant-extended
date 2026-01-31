@@ -28,6 +28,11 @@ if TYPE_CHECKING:
 
 ENTITY_DESCRIPTIONS = (
     SensorEntityDescription(
+        key="status",
+        translation_key="status",
+        icon="mdi:clipboard-check",
+    ),
+    SensorEntityDescription(
         device_class=SensorDeviceClass.DATE,
         key="next_watering",
         translation_key="next_watering",
@@ -152,6 +157,24 @@ class SimplePlantExtendedSensor(SensorEntity):
         """Run when entity is added to hass."""
         await super().async_added_to_hass()
 
+        if self.entity_description.key == "status":
+            todo_entities = [
+                f"binary_sensor.{DOMAIN}_todo_{self.device}",
+                f"binary_sensor.{DOMAIN}_fertilization_todo_{self.device}",
+                f"binary_sensor.{DOMAIN}_misting_todo_{self.device}",
+                f"binary_sensor.{DOMAIN}_cleaning_todo_{self.device}",
+            ]
+            for entity_id in todo_entities:
+                self.async_on_remove(
+                    async_track_state_change_event(
+                        self.hass,
+                        entity_id,
+                        self._update_status,
+                    )
+                )
+            await self._update_status()
+            return
+
         # Handle linked sensor entities (humidity, temperature, light)
         if self.entity_description.key in ["current_humidity", "current_temperature", "current_light"]:
             sensor_key_map = {
@@ -227,6 +250,29 @@ class SimplePlantExtendedSensor(SensorEntity):
                 second=0,
             )
         )
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        """Return device attributes for status sensor only."""
+        if self.entity_description.key != "status":
+            return {}
+        return dict(self.coordinator.device_attributes)
+
+    async def _update_status(self, _event: Event | None = None) -> None:
+        """Update status based on todo sensors."""
+        todo_entities = [
+            f"binary_sensor.{DOMAIN}_todo_{self.device}",
+            f"binary_sensor.{DOMAIN}_fertilization_todo_{self.device}",
+            f"binary_sensor.{DOMAIN}_misting_todo_{self.device}",
+            f"binary_sensor.{DOMAIN}_cleaning_todo_{self.device}",
+        ]
+        has_tasks = any(
+            (state := self.hass.states.get(entity_id))
+            and state.state == "on"
+            for entity_id in todo_entities
+        )
+        self._attr_native_value = "open_tasks" if has_tasks else "ok"
+        self.async_write_ha_state()
 
         # Initial update
         await self._update_state()

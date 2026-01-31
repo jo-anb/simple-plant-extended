@@ -278,6 +278,13 @@
                         },
                         "plant_age_days": {
                                 "name": "Plantleeftijd"
+                        },
+                        "status": {
+                                "name": "Status",
+                                "state": {
+                                        "ok": "OK",
+                                        "open_tasks": "Open taken"
+                                }
                         }
                 }
         },
