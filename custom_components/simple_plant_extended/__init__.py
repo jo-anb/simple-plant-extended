@@ -142,6 +142,24 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
             new=new_state.state,
         )
 
+        if key == "notes":
+            skip_notes = hass.data.setdefault(DOMAIN, {}).setdefault("_notes_skip", {})
+            if skip_notes.get(device) == new_state.state:
+                skip_notes.pop(device, None)
+            else:
+                timestamp = datetime.now(timezone.utc).isoformat()
+                current = await coordinator.store.async_get_data(coordinator.device)
+                notes_log = list(current.get(NOTE_LOG_KEY, []))
+                notes_log.append({"timestamp": timestamp, "note": new_state.state})
+                if len(notes_log) > MAX_NOTES_LOG:
+                    notes_log = notes_log[-MAX_NOTES_LOG:]
+                await coordinator.store.async_save_data(
+                    coordinator.device,
+                    {NOTE_LOG_KEY: notes_log},
+                )
+                updated_data = await coordinator.store.async_get_data(coordinator.device)
+                coordinator.async_set_updated_data(updated_data)
+
         message = await _get_logbook_message(
             hass,
             action,
@@ -160,17 +178,28 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
     async def async_add_note_service(call) -> None:  # type: ignore[no-untyped-def]
         entity_id = call.data.get("entity_id")
         note = call.data.get("note")
+        if not entity_id or note is None:
+            LOGGER.warning("add_note requires entity_id and note")
+            return
         ent_reg = async_get(hass)
         entity_entry = ent_reg.async_get(entity_id)
-        if entity_entry is None:
-            LOGGER.warning("Entity %s not found for add_note", entity_id)
-            return
-        entry_id = entity_entry.config_entry_id
-        coordinator: SimplePlantExtendedCoordinator | None = hass.data[DOMAIN].get(
-            entry_id
-        )
+        coordinator: SimplePlantExtendedCoordinator | None = None
+        if entity_entry is not None:
+            entry_id = entity_entry.config_entry_id
+            coordinator = hass.data[DOMAIN].get(entry_id)
+        if coordinator is None and f"{DOMAIN}_" in entity_id:
+            suffix = entity_id.split(f"{DOMAIN}_", 1)[1]
+            if "_" in suffix:
+                _, device = suffix.rsplit("_", 1)
+                for value in hass.data.get(DOMAIN, {}).values():
+                    if (
+                        isinstance(value, SimplePlantExtendedCoordinator)
+                        and value.device == device
+                    ):
+                        coordinator = value
+                        break
         if coordinator is None:
-            LOGGER.warning("Coordinator not found for entry %s", entry_id)
+            LOGGER.warning("Coordinator not found for entity %s", entity_id)
             return
 
         timestamp = datetime.now(timezone.utc).isoformat()
@@ -184,7 +213,19 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
             coordinator.device,
             {NOTE_LOG_KEY: notes_log},
         )
-        await coordinator.async_refresh()
+        updated_data = await coordinator.store.async_get_data(coordinator.device)
+        coordinator.async_set_updated_data(updated_data)
+
+        notes_entity_id = f"text.{DOMAIN}_notes_{coordinator.device}"
+        hass.data.setdefault(DOMAIN, {}).setdefault("_notes_skip", {})[
+            coordinator.device
+        ] = note
+        await hass.services.async_call(
+            "text",
+            "set_value",
+            {"entity_id": notes_entity_id, "value": note},
+            blocking=True,
+        )
 
         await coordinator.async_log_activity(
             "note_added",

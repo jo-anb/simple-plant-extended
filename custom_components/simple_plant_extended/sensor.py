@@ -148,6 +148,7 @@ class SimplePlantExtendedSensor(SensorEntity):
     async def async_added_to_hass(self) -> None:
         """Run when entity is added to hass."""
         await super().async_added_to_hass()
+        self.async_on_remove(self.coordinator.async_add_listener(self.async_write_ha_state))
 
         if self.entity_description.key == "status":
             todo_entities = [
