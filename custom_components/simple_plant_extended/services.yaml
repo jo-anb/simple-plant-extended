@@ -46,3 +46,38 @@ clear_logs:
               value: 1_year
             - label: All
               value: all
+
+update_config:
+  name: Update config
+  description: Update plant configuration values (acquisition date and linked sensors).
+  fields:
+    entity_id:
+      name: Entity
+      description: Any Simple Plant entity for the target plant.
+      required: true
+      selector:
+        entity: {}
+    acquisition_date:
+      name: Acquisition date
+      description: Plant acquisition date (YYYY-MM-DD). Empty clears the value.
+      required: false
+      selector:
+        text: {}
+    humidity_sensor:
+      name: Humidity sensor
+      description: Entity ID for humidity sensor. Empty clears the value.
+      required: false
+      selector:
+        entity: {}
+    temperature_sensor:
+      name: Temperature sensor
+      description: Entity ID for temperature sensor. Empty clears the value.
+      required: false
+      selector:
+        entity: {}
+    light_sensor:
+      name: Light sensor
+      description: Entity ID for light sensor. Empty clears the value.
+      required: false
+      selector:
+        entity: {}

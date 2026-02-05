@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING, Any
 
@@ -170,71 +169,38 @@ class SimplePlantExtendedCoordinator(DataUpdateCoordinator[dict]):
         await self.async_set_last_action_date(today, f"last_{action}")
 
     async def get_dates(self) -> dict[str, datetime] | None:
-        """Get dates from relevant device entity states, with retry."""
-        states_to_get = {
-            "last_watered": f"date.{DOMAIN}_last_watered_{self.device}",
-            "nb_watered_days": f"number.{DOMAIN}_days_between_waterings_{self.device}",
-            "last_feed": f"sensor.{DOMAIN}_feed_lastfeed_{self.device}",
-            "last_fertilized": f"date.{DOMAIN}_last_fertilized_{self.device}",
-            "nb_fertilized_days": f"number.{DOMAIN}_days_between_fertilizations_{self.device}",
-            "last_misted": f"date.{DOMAIN}_last_misted_{self.device}",
-            "nb_misted_days": f"number.{DOMAIN}_days_between_mistings_{self.device}",
-            "last_cleaned": f"date.{DOMAIN}_last_cleaned_{self.device}",
-            "nb_cleaned_days": f"number.{DOMAIN}_days_between_cleanings_{self.device}",
-        }
+        """Get dates from storage/config without blocking startup."""
+        data = await self.store.async_get_data(self.device)
+        entry_data = self.config_entry.data
 
-        for attempt in range(5):
-            data = {
-                key: self.hass.states.get(eid) for key, eid in states_to_get.items()
-            }
+        def _get_number(key: str, default: float) -> float:
+            store_key = f"{DOMAIN}_{key}_{self.device}"
+            raw = data.get(store_key, entry_data.get(key, default))
+            try:
+                value = float(raw)
+                return value if value > 0 else default
+            except (TypeError, ValueError):
+                return default
 
-            if all(
-                data[key] is not None
-                and data[key].state not in (None, "", "unknown", "unavailable")
-                for key in states_to_get
-            ):
-                break
-
-            LOGGER.info(
-                "%s: Waiting for entity states... (%d)", self.device, attempt + 1
-            )
-            await asyncio.sleep(2)
-        else:
-            LOGGER.warning("%s: Couldn't get all states after retry", self.device)
-            # return None
-
-        states = {key: data[key].state for key in data if data[key] is not None}
+        def _get_date(key: str, default: str) -> datetime:
+            raw = data.get(key, entry_data.get(key, default))
+            try:
+                return datetime.fromisoformat(str(raw))
+            except (TypeError, ValueError):
+                return datetime.fromisoformat(default)
 
         try:
-            last_watered_date = datetime.fromisoformat(states["last_watered"])
-            nb_watered_days = float(states["nb_watered_days"])
+            last_watered_date = _get_date("last_watered", "1970-01-01")
+            nb_watered_days = _get_number("days_between_waterings", 1)
 
-            last_fertilized_date = datetime.fromisoformat("1970-01-01")
-            if states["last_fertilized"] not in ["unknown", "", "None"]:
-                last_fertilized_date = datetime.fromisoformat(states["last_fertilized"])
-            nb_fertilized_days = (
-                float(states["nb_fertilized_days"])
-                if float(states["nb_fertilized_days"]) > 0
-                else 1
-            )
+            last_fertilized_date = _get_date("last_fertilized", "1970-01-01")
+            nb_fertilized_days = _get_number("days_between_fertilizations", 1)
 
-            last_misted_date = datetime.fromisoformat("1970-01-01")
-            if states["last_misted"] not in ["unknown", "", "None"]:
-                last_misted_date = datetime.fromisoformat(states["last_misted"])
-            nb_misted_days = (
-                float(states["nb_misted_days"])
-                if float(states["nb_misted_days"]) > 0
-                else 1
-            )
+            last_misted_date = _get_date("last_misted", "1970-01-01")
+            nb_misted_days = _get_number("days_between_mistings", 1)
 
-            last_cleaned_date = datetime.fromisoformat("1970-01-01")
-            if states["last_cleaned"] not in ["unknown", "", "None"]:
-                last_cleaned_date = datetime.fromisoformat(states["last_cleaned"])
-            nb_cleaned_days = (
-                float(states["nb_cleaned_days"])
-                if float(states["nb_cleaned_days"]) > 0
-                else 1
-            )
+            last_cleaned_date = _get_date("last_cleaned", "1970-01-01")
+            nb_cleaned_days = _get_number("days_between_cleanings", 1)
 
             return {
                 "last_watered": last_watered_date,

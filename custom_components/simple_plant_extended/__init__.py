@@ -42,6 +42,7 @@ CONFIG_SCHEMA = config_entry_only_config_schema(DOMAIN)
 SERVICE_ADD_NOTE = "add_note"
 SERVICE_RELOAD = "reload"
 SERVICE_CLEAR_LOGS = "clear_logs"
+SERVICE_UPDATE_CONFIG = "update_config"
 NOTE_LOG_KEY = "notes_log"
 MAX_NOTES_LOG = 100
 ACTIVITY_LOG_KEY = "activity_log"
@@ -313,6 +314,33 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
             updated_data = await coordinator.store.async_get_data(coordinator.device)
             coordinator.async_set_updated_data(updated_data)
 
+    async def async_update_config_service(call) -> None:  # type: ignore[no-untyped-def]
+        entity_id = call.data.get("entity_id")
+        if not entity_id:
+            LOGGER.warning("update_config requires entity_id")
+            return
+        ent_reg = async_get(hass)
+        entity_entry = ent_reg.async_get(entity_id)
+        if entity_entry is None:
+            LOGGER.warning("Entity %s not found for update_config", entity_id)
+            return
+        entry = hass.config_entries.async_get_entry(entity_entry.config_entry_id)
+        if entry is None:
+            LOGGER.warning("Config entry not found for update_config")
+            return
+
+        data = dict(entry.data)
+        for key in ("acquisition_date", "humidity_sensor", "temperature_sensor", "light_sensor"):
+            if key in call.data:
+                value = call.data.get(key)
+                if value in (None, ""):
+                    data.pop(key, None)
+                else:
+                    data[key] = value
+
+        hass.config_entries.async_update_entry(entry, data=data)
+        await hass.config_entries.async_reload(entry.entry_id)
+
     # Start runtime notifications/broadcast manager
     manager = NotificationManager(hass)
     hass.data[DOMAIN]["notification_manager"] = manager
@@ -352,6 +380,21 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
                 vol.Required("period"): vol.In(
                     ["3_months", "6_months", "1_year", "all"]
                 )
+            }
+        ),
+    )
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_UPDATE_CONFIG,
+        async_update_config_service,
+        schema=vol.Schema(
+            {
+                vol.Required("entity_id"): cv.entity_id,
+                vol.Optional("acquisition_date"): cv.string,
+                vol.Optional("humidity_sensor"): cv.string,
+                vol.Optional("temperature_sensor"): cv.string,
+                vol.Optional("light_sensor"): cv.string,
             }
         ),
     )
