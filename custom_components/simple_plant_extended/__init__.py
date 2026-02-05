@@ -7,7 +7,7 @@ https://github.com/jo-anb/simple-plant-extended
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING
 
 import voluptuous as vol
@@ -41,6 +41,7 @@ CONFIG_SCHEMA = config_entry_only_config_schema(DOMAIN)
 
 SERVICE_ADD_NOTE = "add_note"
 SERVICE_RELOAD = "reload"
+SERVICE_CLEAR_LOGS = "clear_logs"
 NOTE_LOG_KEY = "notes_log"
 MAX_NOTES_LOG = 100
 ACTIVITY_LOG_KEY = "activity_log"
@@ -91,6 +92,8 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
         if old_state.state in {"unknown", "unavailable"}:
             return
         if new_state.state in {"unknown", "unavailable"}:
+            return
+        if not new_state.context or not new_state.context.user_id:
             return
         if old_state.state == new_state.state:
             return
@@ -267,6 +270,49 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
         for entry in hass.config_entries.async_entries(DOMAIN):
             await hass.config_entries.async_reload(entry.entry_id)
 
+    async def async_clear_logs_service(call) -> None:  # type: ignore[no-untyped-def]
+        period = call.data.get("period", "all")
+        cutoff = None
+        now = datetime.now(timezone.utc)
+        if period == "3_months":
+            cutoff = now - timedelta(days=90)
+        elif period == "6_months":
+            cutoff = now - timedelta(days=180)
+        elif period == "1_year":
+            cutoff = now - timedelta(days=365)
+
+        for entry in hass.config_entries.async_entries(DOMAIN):
+            coordinator: SimplePlantExtendedCoordinator | None = hass.data[DOMAIN].get(
+                entry.entry_id
+            )
+            if coordinator is None:
+                continue
+            current = await coordinator.store.async_get_data(coordinator.device)
+
+            def _filter_log(items: list[dict[str, str]] | None) -> list[dict[str, str]]:
+                if not items or cutoff is None:
+                    return [] if period == "all" else (items or [])
+                filtered: list[dict[str, str]] = []
+                for item in items:
+                    timestamp = item.get("timestamp")
+                    if not timestamp:
+                        continue
+                    try:
+                        if datetime.fromisoformat(timestamp) >= cutoff:
+                            filtered.append(item)
+                    except ValueError:
+                        continue
+                return filtered
+
+            notes_log = _filter_log(list(current.get(NOTE_LOG_KEY, [])))
+            activity_log = _filter_log(list(current.get(ACTIVITY_LOG_KEY, [])))
+            await coordinator.store.async_save_data(
+                coordinator.device,
+                {NOTE_LOG_KEY: notes_log, ACTIVITY_LOG_KEY: activity_log},
+            )
+            updated_data = await coordinator.store.async_get_data(coordinator.device)
+            coordinator.async_set_updated_data(updated_data)
+
     # Start runtime notifications/broadcast manager
     manager = NotificationManager(hass)
     hass.data[DOMAIN]["notification_manager"] = manager
@@ -293,6 +339,19 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
         schema=vol.Schema(
             {
                 vol.Optional("entity_id"): cv.entity_id,
+            }
+        ),
+    )
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_CLEAR_LOGS,
+        async_clear_logs_service,
+        schema=vol.Schema(
+            {
+                vol.Required("period"): vol.In(
+                    ["3_months", "6_months", "1_year", "all"]
+                )
             }
         ),
     )

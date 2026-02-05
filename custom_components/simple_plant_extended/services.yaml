@@ -26,3 +26,23 @@ reload:
       required: false
       selector:
         entity: {}
+
+clear_logs:
+  name: Clear logs
+  description: Remove activity and notes logs older than the selected period (or all).
+  fields:
+    period:
+      name: Period
+      description: Age of entries to keep. Older entries will be removed.
+      required: true
+      selector:
+        select:
+          options:
+            - label: Older than 3 months
+              value: 3_months
+            - label: Older than 6 months
+              value: 6_months
+            - label: Older than 1 year
+              value: 1_year
+            - label: All
+              value: all
