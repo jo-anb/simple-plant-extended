@@ -40,6 +40,7 @@ if TYPE_CHECKING:
 CONFIG_SCHEMA = config_entry_only_config_schema(DOMAIN)
 
 SERVICE_ADD_NOTE = "add_note"
+SERVICE_RELOAD = "reload"
 NOTE_LOG_KEY = "notes_log"
 MAX_NOTES_LOG = 100
 ACTIVITY_LOG_KEY = "activity_log"
@@ -251,6 +252,21 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
             entity_id=entity_id,
         )
 
+    async def async_reload_service(call) -> None:  # type: ignore[no-untyped-def]
+        entity_id = call.data.get("entity_id")
+        if entity_id:
+            ent_reg = async_get(hass)
+            entity_entry = ent_reg.async_get(entity_id)
+            if entity_entry is None:
+                LOGGER.warning("Entity %s not found for reload", entity_id)
+                return
+            entry_id = entity_entry.config_entry_id
+            await hass.config_entries.async_reload(entry_id)
+            return
+
+        for entry in hass.config_entries.async_entries(DOMAIN):
+            await hass.config_entries.async_reload(entry.entry_id)
+
     # Start runtime notifications/broadcast manager
     manager = NotificationManager(hass)
     hass.data[DOMAIN]["notification_manager"] = manager
@@ -266,6 +282,17 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
             {
                 vol.Required("entity_id"): cv.entity_id,
                 vol.Required("note"): cv.string,
+            }
+        ),
+    )
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_RELOAD,
+        async_reload_service,
+        schema=vol.Schema(
+            {
+                vol.Optional("entity_id"): cv.entity_id,
             }
         ),
     )

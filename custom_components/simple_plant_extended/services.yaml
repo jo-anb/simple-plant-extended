@@ -15,3 +15,14 @@ add_note:
       selector:
         text:
           multiline: true
+
+reload:
+  name: Reload
+  description: Reload Simple Plant Extended (all entries or a specific entity).
+  fields:
+    entity_id:
+      name: Entity
+      description: Optional entity to reload only the related plant entry.
+      required: false
+      selector:
+        entity: {}
