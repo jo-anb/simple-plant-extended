@@ -78,6 +78,7 @@ This integration provides the following entities
 | simple_plant_extended.add_note | Add a note to the plant timeline and logbook |
 | simple_plant_extended.reload | Reload all entries or the entry for a given entity |
 | simple_plant_extended.clear_logs | Clear activity and notes logs for a given period |
+| simple_plant_extended.update_config | Update acquisition date or linked sensors for a plant |
 
 ## Status sensor attributes
 
