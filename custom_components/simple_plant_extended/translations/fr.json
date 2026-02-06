@@ -20,13 +20,19 @@
     "options": {
         "step": {
             "init": {
-                "description": "Choisissez ce que vous souhaitez configurer. Si vous avez besoin d'aide, allez jeter un oeil ici : https://github.com/jo-anb/simple-plant-extended",
+                "description": "Choisissez ce que vous souhaitez configurer. Si vous avez besoin d'aide, allez jeter un oeil ici : {url}",
+                "description_placeholders": {
+                    "url": "https://github.com/jo-anb/simple-plant-extended"
+                },
                 "data": {
                     "scope": "Périmètre de configuration"
                 }
             },
             "plant": {
-                "description": "Modifiez les détails de la plante. Si vous avez besoin d'aide, allez jeter un oeil ici : https://github.com/jo-anb/simple-plant-extended",
+                "description": "Modifiez les détails de la plante. Si vous avez besoin d'aide, allez jeter un oeil ici : {url}",
+                "description_placeholders": {
+                    "url": "https://github.com/jo-anb/simple-plant-extended"
+                },
                 "data": {
                     "photo": "Photo",
                     "species": "Espèce/Variété (Optionnel)",

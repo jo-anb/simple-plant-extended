@@ -3,7 +3,10 @@
         "config": {
                 "step": {
                         "user": {
-                                "description": "Basisinformatie over je plant. Als je hulp nodig hebt, kijk dan hier: https://github.com/jo-anb/simple-plant-extended",
+                                "description": "Basisinformatie over je plant. Als je hulp nodig hebt, kijk dan hier: {url}",
+                                "description_placeholders": {
+                                        "url": "https://github.com/jo-anb/simple-plant-extended"
+                                },
                                 "data": {
                                         "name": "Naam",
                                         "last_watered": "Laatst water gegeven",
@@ -49,13 +52,19 @@
         "options": {
                 "step": {
                         "init": {
-                                "description": "Kies wat je wilt configureren. Als je hulp nodig hebt, kijk dan hier: https://github.com/jo-anb/simple-plant-extended",
+                                "description": "Kies wat je wilt configureren. Als je hulp nodig hebt, kijk dan hier: {url}",
+                                "description_placeholders": {
+                                        "url": "https://github.com/jo-anb/simple-plant-extended"
+                                },
                                 "data": {
                                         "scope": "Configuratie‑scope"
                                 }
                         },
                         "plant": {
-                                "description": "Werk plantdetails bij. Als je hulp nodig hebt, kijk dan hier: https://github.com/jo-anb/simple-plant-extended",
+                                "description": "Werk plantdetails bij. Als je hulp nodig hebt, kijk dan hier: {url}",
+                                "description_placeholders": {
+                                        "url": "https://github.com/jo-anb/simple-plant-extended"
+                                },
                                 "data": {
                                         "photo": "Foto",
                                         "species": "Soort/Variëteit (optioneel)",
