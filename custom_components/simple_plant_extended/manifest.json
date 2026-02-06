@@ -6,7 +6,8 @@
     ],
     "config_flow": true,
     "dependencies": [
-        "file_upload"
+        "file_upload",
+        "logbook"
     ],
     "documentation": "https://github.com/jo-anb/simple-plant-extended",
     "integration_type": "device",
