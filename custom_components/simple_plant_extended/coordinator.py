@@ -178,9 +178,10 @@ class SimplePlantExtendedCoordinator(DataUpdateCoordinator[dict]):
             raw = data.get(store_key, entry_data.get(key, default))
             try:
                 value = float(raw)
-                return value if value > 0 else default
             except (TypeError, ValueError):
                 return default
+            else:
+                return value if value > 0 else default
 
         def _get_date(key: str, default: str) -> datetime:
             raw = data.get(key, entry_data.get(key, default))

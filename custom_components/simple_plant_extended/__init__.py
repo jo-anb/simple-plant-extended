@@ -7,8 +7,8 @@ https://github.com/jo-anb/simple-plant-extended
 
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta, timezone
 import json
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -16,7 +16,7 @@ import voluptuous as vol
 from homeassistant.components.logbook import async_log_entry
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.const import EVENT_STATE_CHANGED
-from homeassistant.core import Event, async_get_hass
+from homeassistant.core import Event, ServiceCall, async_get_hass
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
@@ -76,6 +76,41 @@ async def _get_logbook_message(
     )
 
 
+def _find_coordinator_by_device(
+    hass: HomeAssistant, device: str
+) -> SimplePlantExtendedCoordinator | None:
+    for value in hass.data.get(DOMAIN, {}).values():
+        if isinstance(value, SimplePlantExtendedCoordinator) and value.device == device:
+            return value
+    return None
+
+
+async def _maybe_handle_notes_update(
+    key: str,
+    hass: HomeAssistant,
+    coordinator: SimplePlantExtendedCoordinator,
+    new_state: Any,
+) -> None:
+    if key != "notes":
+        return
+    skip_notes = hass.data.setdefault(DOMAIN, {}).setdefault("_notes_skip", {})
+    if skip_notes.get(coordinator.device) == new_state.state:
+        skip_notes.pop(coordinator.device, None)
+        return
+    timestamp = datetime.now(UTC).isoformat()
+    current = await coordinator.store.async_get_data(coordinator.device)
+    notes_log = list(current.get(NOTE_LOG_KEY, []))
+    notes_log.append({"timestamp": timestamp, "note": new_state.state})
+    if len(notes_log) > MAX_NOTES_LOG:
+        notes_log = notes_log[-MAX_NOTES_LOG:]
+    await coordinator.store.async_save_data(
+        coordinator.device,
+        {NOTE_LOG_KEY: notes_log},
+    )
+    updated_data = await coordinator.store.async_get_data(coordinator.device)
+    coordinator.async_set_updated_data(updated_data)
+
+
 def _load_extra_translations(language: str) -> dict[str, Any]:
     translations_dir = Path(__file__).parent / "extra_translations"
 
@@ -96,32 +131,31 @@ def _load_extra_translations(language: str) -> dict[str, Any]:
     return data
 
 
-async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
+async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:  # noqa: C901, PLR0915
     """Set up the Simple Plant component."""
     hass.data.setdefault(DOMAIN, {})
 
     async def async_state_changed(event: Event) -> None:
         entity_id = event.data.get("entity_id")
-        if not entity_id or f"{DOMAIN}_" not in entity_id:
-            return
-
         old_state = event.data.get("old_state")
         new_state = event.data.get("new_state")
-        if not old_state or not new_state:
-            return
-        if old_state.state in {"unknown", "unavailable"}:
-            return
-        if new_state.state in {"unknown", "unavailable"}:
-            return
-        if not new_state.context or not new_state.context.user_id:
-            return
-        if old_state.state == new_state.state:
+        if (
+            not entity_id
+            or f"{DOMAIN}_" not in entity_id
+            or not old_state
+            or not new_state
+            or old_state.state in {"unknown", "unavailable"}
+            or new_state.state in {"unknown", "unavailable"}
+            or not new_state.context
+            or not new_state.context.user_id
+            or old_state.state == new_state.state
+        ):
             return
 
         suffix = entity_id.split(f"{DOMAIN}_", 1)[1]
-        if "_" not in suffix:
+        key, _, device = suffix.rpartition("_")
+        if not key or not device:
             return
-        key, device = suffix.rsplit("_", 1)
 
         action_map = {
             "last_watered": "watered",
@@ -151,11 +185,7 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
         if action is None:
             return
 
-        coordinator: SimplePlantExtendedCoordinator | None = None
-        for value in hass.data.get(DOMAIN, {}).values():
-            if isinstance(value, SimplePlantExtendedCoordinator) and value.device == device:
-                coordinator = value
-                break
+        coordinator = _find_coordinator_by_device(hass, device)
         if coordinator is None:
             return
 
@@ -166,23 +196,7 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
             new=new_state.state,
         )
 
-        if key == "notes":
-            skip_notes = hass.data.setdefault(DOMAIN, {}).setdefault("_notes_skip", {})
-            if skip_notes.get(device) == new_state.state:
-                skip_notes.pop(device, None)
-            else:
-                timestamp = datetime.now(UTC).isoformat()
-                current = await coordinator.store.async_get_data(coordinator.device)
-                notes_log = list(current.get(NOTE_LOG_KEY, []))
-                notes_log.append({"timestamp": timestamp, "note": new_state.state})
-                if len(notes_log) > MAX_NOTES_LOG:
-                    notes_log = notes_log[-MAX_NOTES_LOG:]
-                await coordinator.store.async_save_data(
-                    coordinator.device,
-                    {NOTE_LOG_KEY: notes_log},
-                )
-                updated_data = await coordinator.store.async_get_data(coordinator.device)
-                coordinator.async_set_updated_data(updated_data)
+        await _maybe_handle_notes_update(key, hass, coordinator, new_state)
 
         message = await _get_logbook_message(
             hass,
@@ -199,7 +213,7 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
                 entity_id=entity_id,
             )
 
-    async def async_add_note_service(call) -> None:  # type: ignore[no-untyped-def]
+    async def async_add_note_service(call: ServiceCall) -> None:
         entity_id = call.data.get("entity_id")
         note = call.data.get("note")
         if not entity_id or note is None:
@@ -275,7 +289,7 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
             entity_id=entity_id,
         )
 
-    async def async_reload_service(call) -> None:  # type: ignore[no-untyped-def]
+    async def async_reload_service(call: ServiceCall) -> None:
         entity_id = call.data.get("entity_id")
         if entity_id:
             ent_reg = er.async_get(hass)
@@ -290,7 +304,7 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
         for entry in hass.config_entries.async_entries(DOMAIN):
             await hass.config_entries.async_reload(entry.entry_id)
 
-    async def async_clear_logs_service(call) -> None:  # type: ignore[no-untyped-def]
+    async def async_clear_logs_service(call: ServiceCall) -> None:
         period = call.data.get("period", "all")
         cutoff = None
         now = datetime.now(UTC)
@@ -333,7 +347,7 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
             updated_data = await coordinator.store.async_get_data(coordinator.device)
             coordinator.async_set_updated_data(updated_data)
 
-    async def async_update_config_service(call) -> None:  # type: ignore[no-untyped-def]
+    async def async_update_config_service(call: ServiceCall) -> None:
         entity_id = call.data.get("entity_id")
         entry_id = call.data.get("entry_id")
         device_id = call.data.get("device_id")
