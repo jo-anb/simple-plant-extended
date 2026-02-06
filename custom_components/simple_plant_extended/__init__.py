@@ -18,11 +18,11 @@ from homeassistant.core import Event, async_get_hass
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.translation import async_get_translations
 from homeassistant.helpers.config_validation import config_entry_only_config_schema
+from homeassistant.helpers import device_registry as dr, entity_registry as er
 from homeassistant.helpers.device_registry import (
     EVENT_DEVICE_REGISTRY_UPDATED,
     EventDeviceRegistryUpdatedData,
     async_entries_for_config_entry,
-    async_get,
 )
 from homeassistant.util import slugify
 
@@ -186,7 +186,7 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
         if not entity_id or note is None:
             LOGGER.warning("add_note requires entity_id and note")
             return
-        ent_reg = async_get(hass)
+        ent_reg = er.async_get(hass)
         entity_entry = ent_reg.async_get(entity_id)
         coordinator: SimplePlantExtendedCoordinator | None = None
         if entity_entry is not None:
@@ -259,7 +259,7 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
     async def async_reload_service(call) -> None:  # type: ignore[no-untyped-def]
         entity_id = call.data.get("entity_id")
         if entity_id:
-            ent_reg = async_get(hass)
+            ent_reg = er.async_get(hass)
             entity_entry = ent_reg.async_get(entity_id)
             if entity_entry is None:
                 LOGGER.warning("Entity %s not found for reload", entity_id)
@@ -316,15 +316,31 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
 
     async def async_update_config_service(call) -> None:  # type: ignore[no-untyped-def]
         entity_id = call.data.get("entity_id")
-        if not entity_id:
-            LOGGER.warning("update_config requires entity_id")
-            return
-        ent_reg = async_get(hass)
-        entity_entry = ent_reg.async_get(entity_id)
-        if entity_entry is None:
-            LOGGER.warning("Entity %s not found for update_config", entity_id)
-            return
-        entry = hass.config_entries.async_get_entry(entity_entry.config_entry_id)
+        entry_id = call.data.get("entry_id")
+        device_id = call.data.get("device_id")
+
+        entry = None
+        if entry_id:
+            entry = hass.config_entries.async_get_entry(entry_id)
+
+        if entry is None and entity_id:
+            ent_reg = er.async_get(hass)
+            entity_entry = ent_reg.async_get(entity_id)
+            if entity_entry is None:
+                LOGGER.warning("Entity %s not found for update_config", entity_id)
+                return
+            entry = hass.config_entries.async_get_entry(entity_entry.config_entry_id)
+
+        if entry is None and device_id:
+            dev_reg = dr.async_get(hass)
+            device_entry = dev_reg.async_get(device_id)
+            if device_entry:
+                for cfg_entry_id in device_entry.config_entries:
+                    cfg_entry = hass.config_entries.async_get_entry(cfg_entry_id)
+                    if cfg_entry and cfg_entry.domain == DOMAIN:
+                        entry = cfg_entry
+                        break
+
         if entry is None:
             LOGGER.warning("Config entry not found for update_config")
             return
@@ -339,7 +355,8 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
                     data[key] = value
 
         hass.config_entries.async_update_entry(entry, data=data)
-        await hass.config_entries.async_reload(entry.entry_id)
+        # Do not reload here; unloading can fail and break entities.
+        # Config entry updates are handled via update listeners.
 
     # Start runtime notifications/broadcast manager
     manager = NotificationManager(hass)
@@ -390,7 +407,9 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
         async_update_config_service,
         schema=vol.Schema(
             {
-                vol.Required("entity_id"): cv.entity_id,
+                vol.Optional("entity_id"): cv.entity_id,
+                vol.Optional("entry_id"): cv.string,
+                vol.Optional("device_id"): cv.string,
                 vol.Optional("acquisition_date"): cv.string,
                 vol.Optional("humidity_sensor"): cv.string,
                 vol.Optional("temperature_sensor"): cv.string,
@@ -460,7 +479,7 @@ async def on_device_registry_update_handler(
         return
     # Get device
     hass = async_get_hass()
-    device_registry = async_get(hass)
+    device_registry = dr.async_get(hass)
     device = device_registry.async_get(event.data.get("device_id"))
     if not device:
         return
@@ -547,7 +566,7 @@ async def async_reload_entry(
         hass.config_entries.async_update_entry(entry, data=data)
         # remove obsolete device
         device_name = entry.title[0].upper() + entry.title[1:]
-        device_registry = async_get(hass)
+        device_registry = dr.async_get(hass)
         for device in async_entries_for_config_entry(device_registry, entry.entry_id):
             if device.name != device_name:
                 device_registry.async_remove_device(device.id)

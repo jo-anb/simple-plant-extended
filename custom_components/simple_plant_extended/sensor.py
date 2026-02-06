@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import date, datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -115,6 +115,8 @@ class SimplePlantExtendedSensor(SensorEntity):
         self.entry = entry
         self._fallback_value: date | None = None
         self._attr_native_value: date | None = None
+        self._linked_sensor_unsub: Callable[[], None] | None = None
+        self._linked_sensor_entity_id: str | None = None
         self.coordinator: SimplePlantExtendedCoordinator = hass.data[DOMAIN][
             entry.entry_id
         ]
@@ -170,21 +172,11 @@ class SimplePlantExtendedSensor(SensorEntity):
 
         # Handle linked sensor entities (humidity, temperature, light)
         if self.entity_description.key in ["current_humidity", "current_temperature", "current_light"]:
-            sensor_key_map = {
-                "current_humidity": "humidity_sensor",
-                "current_temperature": "temperature_sensor",
-                "current_light": "light_sensor",
-            }
-            sensor_entity_id = self.entry.data.get(sensor_key_map[self.entity_description.key])
-
-            if sensor_entity_id:
-                self.async_on_remove(
-                    async_track_state_change_event(
-                        self.hass,
-                        sensor_entity_id,
-                        self._update_linked_sensor,
-                    )
-                )
+            self.async_on_remove(
+                self.entry.add_update_listener(self._handle_entry_update)
+            )
+            self.async_on_remove(self._clear_linked_sensor_listener)
+            self._update_linked_sensor_listener()
             # Initial update
             await self._update_linked_sensor()
             return
@@ -344,6 +336,48 @@ class SimplePlantExtendedSensor(SensorEntity):
             self._attr_available = False
 
         self.async_write_ha_state()
+
+    async def _handle_entry_update(
+        self, _hass: HomeAssistant, entry: ConfigEntry
+    ) -> None:
+        """Handle config entry updates to refresh linked sensor."""
+        self.entry = entry
+        if self.entity_description.key in [
+            "current_humidity",
+            "current_temperature",
+            "current_light",
+        ]:
+            self._update_linked_sensor_listener()
+            await self._update_linked_sensor()
+
+    def _clear_linked_sensor_listener(self) -> None:
+        if self._linked_sensor_unsub is not None:
+            self._linked_sensor_unsub()
+            self._linked_sensor_unsub = None
+
+    def _update_linked_sensor_listener(self) -> None:
+        sensor_key_map = {
+            "current_humidity": "humidity_sensor",
+            "current_temperature": "temperature_sensor",
+            "current_light": "light_sensor",
+        }
+        sensor_entity_id = self.entry.data.get(sensor_key_map[self.entity_description.key])
+
+        if sensor_entity_id == self._linked_sensor_entity_id:
+            return
+
+        if self._linked_sensor_unsub is not None:
+            self._linked_sensor_unsub()
+            self._linked_sensor_unsub = None
+
+        self._linked_sensor_entity_id = sensor_entity_id
+
+        if sensor_entity_id:
+            self._linked_sensor_unsub = async_track_state_change_event(
+                self.hass,
+                sensor_entity_id,
+                self._update_linked_sensor,
+            )
 
     async def _update_plant_age(
         self, _event: datetime | None = None

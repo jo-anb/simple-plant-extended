@@ -54,9 +54,21 @@ update_config:
     entity_id:
       name: Entity
       description: Any Simple Plant entity for the target plant.
-      required: true
+      required: false
       selector:
         entity: {}
+    device_id:
+      name: Device
+      description: Device id for the target plant.
+      required: false
+      selector:
+        device: {}
+    entry_id:
+      name: Config entry id
+      description: Config entry id for the target plant.
+      required: false
+      selector:
+        text: {}
     acquisition_date:
       name: Acquisition date
       description: Plant acquisition date (YYYY-MM-DD). Empty clears the value.
