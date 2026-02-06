@@ -530,7 +530,9 @@ class SimplePlantExtendedOptionFlowHandler(OptionsFlow):
             return await self.async_step_integration()
         return self.async_show_form(step_id="init", data_schema=scope_form())
 
-    async def async_step_plant(self, user_input: dict | None = None) -> ConfigFlowResult:
+    async def async_step_plant(
+        self, user_input: dict | None = None
+    ) -> ConfigFlowResult:
         """Handle plant-specific options."""
         form = option_form(self.entry.data.get("species"))
 

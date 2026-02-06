@@ -152,7 +152,9 @@ class SimplePlantExtendedSensor(SensorEntity):
     async def async_added_to_hass(self) -> None:
         """Run when entity is added to hass."""
         await super().async_added_to_hass()
-        self.async_on_remove(self.coordinator.async_add_listener(self.async_write_ha_state))
+        self.async_on_remove(
+            self.coordinator.async_add_listener(self.async_write_ha_state)
+        )
 
         if self.entity_description.key == "status":
             todo_entities = [
@@ -173,7 +175,11 @@ class SimplePlantExtendedSensor(SensorEntity):
             return
 
         # Handle linked sensor entities (humidity, temperature, light)
-        if self.entity_description.key in ["current_humidity", "current_temperature", "current_light"]:
+        if self.entity_description.key in [
+            "current_humidity",
+            "current_temperature",
+            "current_light",
+        ]:
             self.async_on_remove(
                 self.entry.add_update_listener(self._handle_entry_update)
             )
@@ -257,8 +263,7 @@ class SimplePlantExtendedSensor(SensorEntity):
             f"binary_sensor.{DOMAIN}_cleaning_todo_{self.device}",
         ]
         has_tasks = any(
-            (state := self.hass.states.get(entity_id))
-            and state.state == "on"
+            (state := self.hass.states.get(entity_id)) and state.state == "on"
             for entity_id in todo_entities
         )
         self._attr_native_value = "open_tasks" if has_tasks else "ok"
@@ -317,7 +322,9 @@ class SimplePlantExtendedSensor(SensorEntity):
             "current_light": "light_sensor",
         }
 
-        sensor_entity_id = self.entry.data.get(sensor_key_map[self.entity_description.key])
+        sensor_entity_id = self.entry.data.get(
+            sensor_key_map[self.entity_description.key]
+        )
 
         if not sensor_entity_id:
             self._attr_native_value = None
@@ -363,7 +370,9 @@ class SimplePlantExtendedSensor(SensorEntity):
             "current_temperature": "temperature_sensor",
             "current_light": "light_sensor",
         }
-        sensor_entity_id = self.entry.data.get(sensor_key_map[self.entity_description.key])
+        sensor_entity_id = self.entry.data.get(
+            sensor_key_map[self.entity_description.key]
+        )
 
         if sensor_entity_id == self._linked_sensor_entity_id:
             return
@@ -381,9 +390,7 @@ class SimplePlantExtendedSensor(SensorEntity):
                 self._update_linked_sensor,
             )
 
-    async def _update_plant_age(
-        self, _event: datetime | None = None
-    ) -> None:
+    async def _update_plant_age(self, _event: datetime | None = None) -> None:
         """Update plant age in days."""
         acquisition_date = self.entry.data.get("acquisition_date")
 

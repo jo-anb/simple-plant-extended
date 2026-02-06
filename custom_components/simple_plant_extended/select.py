@@ -143,7 +143,6 @@ class SimplePlantExtendedSelect(SelectEntity):
         """Return the device name."""
         return self.coordinator.device
 
-
     async def async_added_to_hass(self) -> None:
         """Run when entity is added to hass."""
 

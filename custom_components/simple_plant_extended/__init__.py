@@ -379,7 +379,12 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:  # noqa
             return
 
         data = dict(entry.data)
-        for key in ("acquisition_date", "humidity_sensor", "temperature_sensor", "light_sensor"):
+        for key in (
+            "acquisition_date",
+            "humidity_sensor",
+            "temperature_sensor",
+            "light_sensor",
+        ):
             if key in call.data:
                 value = call.data.get(key)
                 if value in (None, ""):
@@ -426,11 +431,7 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:  # noqa
         SERVICE_CLEAR_LOGS,
         async_clear_logs_service,
         schema=vol.Schema(
-            {
-                vol.Required("period"): vol.In(
-                    ["3_months", "6_months", "1_year", "all"]
-                )
-            }
+            {vol.Required("period"): vol.In(["3_months", "6_months", "1_year", "all"])}
         ),
     )
 
