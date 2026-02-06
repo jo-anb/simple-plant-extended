@@ -299,34 +299,6 @@
                         }
                 }
         },
-        "component": {
-                "simple_plant_extended": {
-                        "notification": {
-                                "water_today_title": "🌱🫗 {plant} moet vandaag water krijgen",
-                                "water_late_title": "🌱🫗 Water geven aan {plant} is {days} dagen te laat",
-                                "water_message": "Druk hieronder wanneer je {plant} water hebt gegeven.",
-                                "fertilize_today_title": "🌱🫗 {plant} moet vandaag worden bemest",
-                                "fertilize_message": "Druk hieronder wanneer je {plant} hebt bemest.",
-                                "mist_today_title": "🌱🫗 {plant} moet vandaag worden beneveld",
-                                "mist_message": "Druk hieronder wanneer je {plant} hebt beneveld.",
-                                "clean_today_title": "🌱🫗 {plant} moet vandaag worden gereinigd",
-                                "clean_message": "Druk hieronder wanneer je {plant} hebt gereinigd.",
-                                "action_mark_done": "✅ Markeer als gedaan",
-                                "action_skip": "Overslaan"
-                        },
-                        "broadcast": {
-                                "water_overdue": "Achterstallige taak voor {plant}. {plant} had {when} geleden water moeten krijgen.",
-                                "water_today": "{plant} moet vandaag water krijgen.",
-                                "fertilize_overdue": "Achterstallige taak voor {plant}. {plant} had {feed_type} meststof {when} geleden moeten krijgen.",
-                                "fertilize_today": "{plant} moet vandaag {feed_type} meststof krijgen.",
-                                "mist_overdue": "Achterstallige taak voor {plant}. {plant} had {when} geleden beneveld moeten worden.",
-                                "mist_today": "{plant} moet vandaag beneveld worden.",
-                                "clean_overdue": "Achterstallige taak voor {plant}. {plant} had {when} geleden gereinigd moeten worden.",
-                                "clean_today": "{plant} moet vandaag gereinigd worden.",
-                                "no_tasks": "Geen planttaken op dit moment."
-                        }
-                }
-        },
         "services": {
                 "add_note": {
                         "name": "Notitie toevoegen",
@@ -342,30 +314,6 @@
                                 }
                         }
                 }
-        },
-        "logbook": {
-                "watered": "Water gegeven: {old} → {new}",
-                "fertilized": "Bemesting: {old} → {new}",
-                "misted": "Beneveld: {old} → {new}",
-                "cleaned": "Gereinigd: {old} → {new}",
-                "location_changed": "Locatie gewijzigd: {old} → {new}",
-                "size_changed": "Grootte gewijzigd: {old} → {new}",
-                "soil_type_changed": "Soort potgrond gewijzigd: {old} → {new}",
-                "feed_method_changed": "Voedingsmethode gewijzigd: {old} → {new}",
-                "illumination_changed": "Lichtbehoefte gewijzigd: {old} → {new}",
-                "health_changed": "Gezondheid gewijzigd: {old} → {new}",
-                "misting_setting_changed": "Beneveling instelling gewijzigd: {old} → {new}",
-                "cleaning_setting_changed": "Reiniging instelling gewijzigd: {old} → {new}",
-                "distance_to_window_changed": "Afstand tot raam gewijzigd: {old} → {new}",
-                "pot_diameter_changed": "Potdiameter gewijzigd: {old} → {new}",
-                "watering_interval_changed": "Wateringsinterval gewijzigd: {old} → {new}",
-                "fertilization_interval_changed": "Bemestingsinterval gewijzigd: {old} → {new}",
-                "misting_interval_changed": "Benevelingsinterval gewijzigd: {old} → {new}",
-                "cleaning_interval_changed": "Reinigingsinterval gewijzigd: {old} → {new}",
-                "notes_updated": "Notities gewijzigd: {old} → {new}",
-                "species_updated": "Soort/Variëteit gewijzigd: {old} → {new}",
-                "image_updated": "Afbeelding gewijzigd: {old} → {new}",
-                "note_added": "Notitie toegevoegd: {note}"
         },
         "exceptions": {
                 "invalid_future_date": {

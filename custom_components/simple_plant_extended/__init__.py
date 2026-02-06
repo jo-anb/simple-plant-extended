@@ -8,7 +8,9 @@ https://github.com/jo-anb/simple-plant-extended
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta, timezone
-from typing import TYPE_CHECKING
+import json
+from pathlib import Path
+from typing import TYPE_CHECKING, Any
 
 import voluptuous as vol
 from homeassistant.components.logbook import async_log_entry
@@ -24,7 +26,6 @@ from homeassistant.helpers.device_registry import (
     EventDeviceRegistryUpdatedData,
     async_entries_for_config_entry,
 )
-from homeassistant.helpers.translation import async_get_translations
 from homeassistant.util import slugify
 
 from .config_flow import remove_photo
@@ -61,13 +62,10 @@ async def _get_logbook_message(
     cache = hass.data.setdefault(DOMAIN, {}).setdefault("_logbook_translations", {})
     translations = cache.get(language)
     if translations is None:
-        translations = await async_get_translations(
-            hass, language, "logbook", {DOMAIN}
-        )
+        translations = _load_extra_translations(language)
         cache[language] = translations
 
-    key = f"{DOMAIN}.logbook.{action}"
-    template = translations.get(key)
+    template = translations.get("logbook", {}).get(action)
     if not template:
         return None
 
@@ -76,6 +74,26 @@ async def _get_logbook_message(
         new=new or "",
         note=note or "",
     )
+
+
+def _load_extra_translations(language: str) -> dict[str, Any]:
+    translations_dir = Path(__file__).parent / "extra_translations"
+
+    def load(lang_code: str) -> dict[str, Any]:
+        path = translations_dir / f"{lang_code}.json"
+        if not path.exists():
+            return {}
+        try:
+            return json.loads(path.read_text(encoding="utf-8"))
+        except Exception:  # noqa: BLE001
+            return {}
+
+    data = load(language)
+    if not data and "-" in language:
+        data = load(language.split("-", 1)[0])
+    if not data:
+        data = load("en")
+    return data
 
 
 async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:

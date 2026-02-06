@@ -1,0 +1,54 @@
+{
+    "component": {
+        "simple_plant_extended": {
+            "notification": {
+                "water_today_title": "🌱🫗 {plant} needs watering today",
+                "water_late_title": "🌱🫗 {plant} watering is {days} days overdue",
+                "water_message": "Tap below when you've watered {plant}.",
+                "fertilize_today_title": "🌱🫗 {plant} needs fertilizing today",
+                "fertilize_message": "Tap below when you've fertilized {plant}.",
+                "mist_today_title": "🌱🫗 {plant} needs misting today",
+                "mist_message": "Tap below when you've misted {plant}.",
+                "clean_today_title": "🌱🫗 {plant} needs cleaning today",
+                "clean_message": "Tap below when you've cleaned {plant}.",
+                "action_mark_done": "✅ Mark as done",
+                "action_skip": "Skip"
+            },
+            "broadcast": {
+                "water_overdue": "Overdue task for {plant}. {plant} needed to be watered {when} ago.",
+                "water_today": "{plant} needs to be watered today.",
+                "fertilize_overdue": "Overdue task for {plant}. {plant} needed {feed_type} plantfood {when} ago.",
+                "fertilize_today": "{plant} needs {feed_type} plantfood today.",
+                "mist_overdue": "Overdue task for {plant}. {plant} needed misting {when} ago.",
+                "mist_today": "{plant} needs misting today.",
+                "clean_overdue": "Overdue task for {plant}. {plant} needed cleaning {when} ago.",
+                "clean_today": "{plant} needs cleaning today.",
+                "no_tasks": "No plant tasks right now."
+            }
+        }
+    },
+    "logbook": {
+        "watered": "Watered: {old} → {new}",
+        "fertilized": "Fertilized: {old} → {new}",
+        "misted": "Misted: {old} → {new}",
+        "cleaned": "Cleaned: {old} → {new}",
+        "location_changed": "Location changed: {old} → {new}",
+        "size_changed": "Size changed: {old} → {new}",
+        "soil_type_changed": "Soil type changed: {old} → {new}",
+        "feed_method_changed": "Feed method changed: {old} → {new}",
+        "illumination_changed": "Illumination changed: {old} → {new}",
+        "health_changed": "Health changed: {old} → {new}",
+        "misting_setting_changed": "Misting setting changed: {old} → {new}",
+        "cleaning_setting_changed": "Cleaning setting changed: {old} → {new}",
+        "distance_to_window_changed": "Distance to window changed: {old} → {new}",
+        "pot_diameter_changed": "Pot diameter changed: {old} → {new}",
+        "watering_interval_changed": "Watering interval changed: {old} → {new}",
+        "fertilization_interval_changed": "Fertilization interval changed: {old} → {new}",
+        "misting_interval_changed": "Misting interval changed: {old} → {new}",
+        "cleaning_interval_changed": "Cleaning interval changed: {old} → {new}",
+        "notes_updated": "Notes updated: {old} → {new}",
+        "species_updated": "Species updated: {old} → {new}",
+        "image_updated": "Image updated: {old} → {new}",
+        "note_added": "Note added: {note}"
+    }
+}

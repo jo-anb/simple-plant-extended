@@ -163,7 +163,7 @@ class NotificationManager:
             return template
 
     def _load_translation_file(self, lang: str) -> dict[str, Any]:
-        translations_dir = Path(__file__).parent / "translations"
+        translations_dir = Path(__file__).parent / "extra_translations"
 
         def load(lang_code: str) -> dict[str, Any]:
             path = translations_dir / f"{lang_code}.json"
