@@ -7,7 +7,7 @@ https://github.com/jo-anb/simple-plant-extended
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta, timezone
 from typing import TYPE_CHECKING
 
 import voluptuous as vol
@@ -16,14 +16,15 @@ from homeassistant.config_entries import ConfigEntryState
 from homeassistant.const import EVENT_STATE_CHANGED
 from homeassistant.core import Event, async_get_hass
 from homeassistant.helpers import config_validation as cv
-from homeassistant.helpers.translation import async_get_translations
+from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.config_validation import config_entry_only_config_schema
-from homeassistant.helpers import device_registry as dr, entity_registry as er
 from homeassistant.helpers.device_registry import (
     EVENT_DEVICE_REGISTRY_UPDATED,
     EventDeviceRegistryUpdatedData,
     async_entries_for_config_entry,
 )
+from homeassistant.helpers.translation import async_get_translations
 from homeassistant.util import slugify
 
 from .config_flow import remove_photo
@@ -152,7 +153,7 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
             if skip_notes.get(device) == new_state.state:
                 skip_notes.pop(device, None)
             else:
-                timestamp = datetime.now(timezone.utc).isoformat()
+                timestamp = datetime.now(UTC).isoformat()
                 current = await coordinator.store.async_get_data(coordinator.device)
                 notes_log = list(current.get(NOTE_LOG_KEY, []))
                 notes_log.append({"timestamp": timestamp, "note": new_state.state})
@@ -207,7 +208,7 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
             LOGGER.warning("Coordinator not found for entity %s", entity_id)
             return
 
-        timestamp = datetime.now(timezone.utc).isoformat()
+        timestamp = datetime.now(UTC).isoformat()
         current = await coordinator.store.async_get_data(coordinator.device)
         notes_log = list(current.get(NOTE_LOG_KEY, []))
         notes_log.append({"timestamp": timestamp, "note": note})
@@ -274,7 +275,7 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
     async def async_clear_logs_service(call) -> None:  # type: ignore[no-untyped-def]
         period = call.data.get("period", "all")
         cutoff = None
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         if period == "3_months":
             cutoff = now - timedelta(days=90)
         elif period == "6_months":

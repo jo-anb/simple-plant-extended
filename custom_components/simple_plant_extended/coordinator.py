@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING, Any
 
 from homeassistant.exceptions import ServiceValidationError
@@ -70,7 +70,7 @@ class SimplePlantExtendedCoordinator(DataUpdateCoordinator[dict]):
         note: str | None = None,
     ) -> None:
         """Append an activity log entry for this device."""
-        timestamp = datetime.now(timezone.utc).isoformat()
+        timestamp = datetime.now(UTC).isoformat()
         entry: dict[str, Any] = {
             "timestamp": timestamp,
             "action": action,
