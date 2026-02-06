@@ -20,7 +20,11 @@ prerelease = false
 
 [semantic_release.changelog]
 mask_initial_release = true
-exclude_commit_patterns = []
+exclude_commit_patterns = [
+	"^refactor",
+	"^chore",
+	"^build",
+]
 mode = "update"
 insertion_flag = "<!-- version list -->"
 template_dir = "templates"
