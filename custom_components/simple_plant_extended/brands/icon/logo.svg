@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Simple Plant Extended logo">
+  <defs>
+    <linearGradient id="leaf" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5AD36B"/>
+      <stop offset="100%" stop-color="#2E9E4D"/>
+    </linearGradient>
+    <linearGradient id="pot" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#C97B4E"/>
+      <stop offset="100%" stop-color="#9C5A34"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="256" height="256" rx="48" fill="#F4F7F5"/>
+
+  <g transform="translate(0,8)">
+    <path d="M128 44c-24 18-36 44-36 70 0 12 4 23 12 32 6-10 16-19 30-27 22-12 36-34 36-57 0-8-2-15-6-18-12 6-24 12-36 20z" fill="url(#leaf)"/>
+    <path d="M128 60c-8 20-10 44-8 68 1 13 4 25 8 36 4-11 7-23 8-36 2-24 0-48-8-68z" fill="#2B7A3D" opacity="0.9"/>
+  </g>
+
+  <g transform="translate(56,148)">
+    <path d="M16 0h112l-12 56a12 12 0 0 1-12 9H40a12 12 0 0 1-12-9L16 0z" fill="url(#pot)"/>
+    <rect x="8" y="-10" width="128" height="18" rx="9" fill="#B56D42"/>
+  </g>
+</svg>
